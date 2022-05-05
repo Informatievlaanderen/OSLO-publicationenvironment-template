@@ -2,6 +2,20 @@
 This is a template for the OSLO publication environment.
 
 
+![overview](overview.jpg)
+
+This template forms the boilerplate for the publication environment.
+The repository [OSLOthema-template](https://github.com/Informatievlaanderen/OSLOthema-template) is a boilerplate template for the OSLOthema repositories.
+
+The objective of an instance of this template is to automate the publication of the data standards in a static website. 
+The data standards are managed in separate thema repositories.
+Separating the data specifications content from the publication environment creates flexibility and scaling potential, without loosing a central control.
+The content of the static website is available in the generated repository.
+The operational deployment the static website is indepedent from , and beyond the configuration of this repository.
+A setup is described in the [documention](./documentation/README.md).
+
+
+
 
 ## deployment instructions
 After the template has initiated a publication environment, the setup has to be completed with additional configuration.
