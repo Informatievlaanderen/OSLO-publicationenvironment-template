@@ -1,0 +1,7 @@
+{
+    "dcterms:license" : "https://creativecommons.org/publicdomain/zero/1.0/",
+    "dcterms:mediator" : { "foaf:homepage" : "https://data.specs.org",
+		           "foaf:mbox" : "mailto:info@data.specs.org",
+			   "foaf:name" : "Data Specifications Organisation" 
+    }
+}
