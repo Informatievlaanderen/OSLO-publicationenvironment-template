@@ -3,6 +3,9 @@
 The publication environment has been setup to minimize the rollout and maintenance effort of any change to the system in a predicatable way. 
 Whereas most of the configuration in this repository has to do with the way how the artifact generation process is done,
 this documentation describes the publication environment that will consume the generated repository.
+
+The usage of this environment is optional, but since the design of the publication environment is done to automate the complete flow from editor to publication it is relevant to add this documentation.
+
 The components of this setup are also available on request at https://data.vlaanderen.be. 
 They are build on Open Source software.
 
