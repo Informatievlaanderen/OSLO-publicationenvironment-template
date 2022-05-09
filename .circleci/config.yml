@@ -77,13 +77,13 @@ jobs:
       OTHER_FOLDER: <<parameters.other_folder>>
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "$$SSHKEYFINGERPRINT"
-      - run:
-          name: update and add extra statements of updating the ssh config for each private ssh key
-          command: |
-            $PWD/scripts/update_sshconfig.sh private1
+#      - add_ssh_keys:
+#          fingerprints:
+#            - "$$SSHKEYFINGERPRINT"
+#      - run:
+#          name: update and add extra statements of updating the ssh config for each private ssh key
+#          command: |
+#            $PWD/scripts/update_sshconfig.sh private1
       - run: mkdir -p workspace
       - run: ls -al workspace
       - run:
@@ -585,6 +585,6 @@ workflows:
             - render-context-details
             - render-voc-rdf
       - create-artifact:
-          repository: $$GITURL-GENERATEDREPO
+          repository: git@github.com:Informatievlaanderen/purl-eu-generated.git
           requires:
             - expand-links
