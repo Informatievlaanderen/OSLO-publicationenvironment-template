@@ -63,6 +63,27 @@ But the scripts are made smart to reduce the impact of these elements.
 
 
 
+# Workflow jobs
 
+The objective of each job is shortly described in this section.
+
+
+  - *checkout* : The initiating job of the workflow. Its purpose is checking out all publication points that require processing. 
+  - *extract-jsonld-details*: The job will extract a json representation from the UML file for all checked out publication points.
+  - *normalise-jsonld*: Format all json representations in the same order. This done to have stable artifacts.
+  - *validate-report*: This job collects all errors that are found during the json extraction process.
+  - *render-translation-json*: Create/Update the translation file for each json representation for each language.
+  - *render-merged-jsonld*: Merge the translation file for each language with the json representation to create a json representation per language.
+  - *validate-and-generate-translation-report*: This jobs collects all errors that are found during the translation jobs
+  - *render-example-templates*: render the examples per language for each publication point 
+  - *render-html-details*: render the html artifact per language for each publication point 
+  - *render-voc-jsonld*: render the RDF artifact for a vocabulary publication point in json-ld format
+  - *render-voc-rdf*: convert the json-ld format to each RDF artifact
+  - *render-shacl-details*: render the SHACL artifact per language for each publication point in json-ld format
+  - *convert-json-to-ttl*: convert the json-ld format for the SHACL artifact
+  - *render-context-details*: render the json-ld context per language for each publication point
+  - *copy-raw*: copy the content of a publication point as-is to the target location
+  - *expand-links*: copy the content of a versioned publication point that has been created during the execution of the workflow
+  - *create-artifact*: assemble all generated content in a commit for the generated repository and push the change.
 
 
