@@ -9,4 +9,7 @@
 - halt on error in ea-to-rdf extraction process.
 - publish translation support files
 
+# version 3.0.2
+- fix the upgrade_config.sh script to not change the configuration when the configuration contains a valid translation block.
+
  
