@@ -15,5 +15,7 @@
 # version 3.0.3
 - add documentation on the Docker images used
 - version fix the Docker images
+- re-iniate template variable in CircleCI config
+- add xsd generation configuration 
 
  

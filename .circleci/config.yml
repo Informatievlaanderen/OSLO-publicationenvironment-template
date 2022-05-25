@@ -297,6 +297,26 @@ jobs:
           root: /tmp/workspace
           paths:
             - target/
+  render-xsd-details:
+    docker:
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Render XSD Details
+          command: |
+            $PWD/scripts/render-details.sh /tmp/workspace xsd $PWD/config
+            mkdir -p /tmp/workspace/target
+      - run:
+          name: List the xsd files found
+          command: |
+            if [ -d /tmp/workspace/target ] ; then find /tmp/workspace/target -name \*.xsd -type f ; fi
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - target/
   render-shacl-details:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.3
@@ -568,6 +588,9 @@ workflows:
       - render-context-details:
           requires:
             - render-merged-jsonld
+#      - render-xsd-details:
+#          requires:
+#            - render-merged-jsonld
       - render-translation-json:
           requires:
             - normalise-jsonld
@@ -586,6 +609,6 @@ workflows:
             - render-context-details
             - render-voc-rdf
       - create-artifact:
-          repository: git@github.com:Informatievlaanderen/purl-eu-generated.git
+          repository: $$GITURL-GENERATEDREPO
           requires:
             - expand-links
