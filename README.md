@@ -1,6 +1,8 @@
 # OSLO-publicationenvironment-template
 This is a template for the OSLO publication environment.
 
+The version of this template is found in [config/config.json](./config/config.json).
+
 
 ![overview](overview.jpg)
 
@@ -30,3 +32,12 @@ After the template has initiated a publication environment, the setup has to be 
 4. Select a demo thema repository containing a valid data specification for testing purposes, and configure the first publication point.
 5. address any technical error, until the demo publication point is successfully processed and resulted in an expected commit in the generated repository.
 6. remove any boilerplate documentation files that is superflusious.
+
+
+## versioning and development
+
+1. Create a new branch with the new version number. By preference starting from the branch with the previous version number.
+2. Bump the version number in the Changelog and config/config.json
+3. Make your changes
+
+Releasing and merging into the main branch are to be discussed.
