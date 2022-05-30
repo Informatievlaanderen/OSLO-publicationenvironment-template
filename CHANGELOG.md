@@ -18,5 +18,6 @@
 - re-iniate template variable in CircleCI config
 - add xsd generation configuration 
 - add extra message in case downloading from GitHub fails
+- fix mapping for vocabulary definition
 
  
