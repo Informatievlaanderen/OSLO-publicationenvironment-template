@@ -20,4 +20,6 @@
 - add extra message in case downloading from GitHub fails
 - fix mapping for vocabulary definition
 
+# version 3.0.4
+- upgrading configs from toolchain 2.0 to toolchain 3.0 bugfix
  
