@@ -12,4 +12,12 @@
 # version 3.0.2
 - fix the upgrade_config.sh script to not change the configuration when the configuration contains a valid translation block.
 
+# version 3.0.3
+- add documentation on the Docker images used
+- version fix the Docker images
+- re-iniate template variable in CircleCI config
+- add xsd generation configuration 
+- add extra message in case downloading from GitHub fails
+- fix mapping for vocabulary definition
+
  

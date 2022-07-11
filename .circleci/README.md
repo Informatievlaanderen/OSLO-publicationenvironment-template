@@ -87,3 +87,13 @@ The objective of each job is shortly described in this section.
   - *create-artifact*: assemble all generated content in a commit for the generated repository and push the change.
 
 
+The jobs rely on public docker images which are either published by CircleCI or build on top of these with specific software installed.
+The two main are 
+
+  - informatievlaanderen/oslo-ea-to-rdf:json-ld-format-m1.1.1
+  - informatievlaanderen/oslo-specification-generator:multilingual-dev-0.3
+
+
+The first image contains the Enterprise Architect Conversion Tool, a tool that extracts from the UML model the core semantic data. 
+The second image contains all artifact generation tools.
+
