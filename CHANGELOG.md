@@ -22,4 +22,5 @@
 
 # version 3.0.4
 - upgrading configs from toolchain 2.0 to toolchain 3.0 bugfix
+- html-renderer: bugfix, language aware title in translation config block is taken into account.
  
