@@ -26,4 +26,5 @@
 
 # version 3.0.5
 - add checker script to validate the presence of each publication point in the generated repository
+- make triggerall option to rebuild only the changed publication points when switched off
  
