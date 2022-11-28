@@ -25,6 +25,7 @@
 - html-renderer: bugfix, language aware title in translation config block is taken into account.
 
 # version 3.0.5
-- add checker script to validate the presence of each publication point in the generated repository
+- add scripts to validate the presence of each publication point in the generated repository
+- integrate the scripts in the last step of CircleCI artefact_create
 - make triggerall option to rebuild only the changed publication points when switched off
- 
+- fix issues with English vocabulary template 
