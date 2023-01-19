@@ -29,3 +29,4 @@
 - integrate the scripts in the last step of CircleCI artefact_create
 - make triggerall option to rebuild only the changed publication points when switched off
 - fix issues with English vocabulary template 
+- fix external dependency failure of ruby tool linkeddata by bumping the ruby image version 
