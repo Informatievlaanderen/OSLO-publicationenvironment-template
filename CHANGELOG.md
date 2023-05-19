@@ -46,5 +46,6 @@
      - add attributes to encode information can be moved to /config/config.json
      - add a new script to clone a repository
 - upgraded to the latest CircleCI docker base images
+- update_sshconfig.sh has a missing handling of the first argument
 
 
