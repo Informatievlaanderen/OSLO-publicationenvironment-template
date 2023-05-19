@@ -37,3 +37,14 @@
 - introduce improvement case of wegenenenverkeer.data.vlaanderen.be 
     copy only the parts from the Thema repository that are relevant for the processing of the publication point.
     I.e. not the directories codelijsten and site-skeleton subdirectories of other specifications 
+
+# version 3.1.0
+- bumped the number as this contains a major revision in the structure of the CircleCI config. 
+  The change requires substantial adaptations to the config (mainly reducing the number of parameters).
+  To indicate this effort a new major release number is created.
+- reduced the amount of adaptations that a toolchain deployer has to do the CircleCI config:
+     - add attributes to encode information can be moved to /config/config.json
+     - add a new script to clone a repository
+- upgraded to the latest CircleCI docker base images
+
+

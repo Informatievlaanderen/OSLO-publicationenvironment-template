@@ -23,16 +23,12 @@ Therefore these scripts can also be considered part of the CircleCI configuratio
 
 ## Parameters
 The CircleCI configuration must be adapted with the real values for the publication environment.
+Prior release 3.0.6 many parameters had to be explicitly set in the CircleCI configuration file, but release 3.0.6 reduced the amount to the settings of the ssh-keys.
 These values should be conform with the values in `/config/config.json`.
 
 |PARAMETER in config.yml|attribute in config.json|description|
 |---|---|---|
-| `$$GENERATEDREPO`         |generatedrepository.repository | the name of the generated repository |
-| `$$GITURL-GENERATEDREPRO` | - | The ssh url to clone the generated repository |
 | `$$SSHKEYFINGERPRINT`     | - | The ssh key fingerprints. See deployment instructions at [README.md](../config/README.md) |
-| `$$GITUSEREMAIL`          | -  | The email of the git user that commits the change to the generated repository. Example "info@data.specs.org"|
-| `$$GITUSERNAME`           | -  | The user name of the git user that commits the change to the generated repository Example "Circle CI Builder"|
-| `$${DEV,TEST,PROD}HOSTNAME` | domain,hostname | the hostnames on which the branches in the generated repository are being published. The default branch-names are `dev`,`test`,`production`. |
 
 
 
