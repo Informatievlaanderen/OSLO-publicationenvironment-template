@@ -32,3 +32,5 @@
 - fix external dependency failure of ruby tool linkeddata by bumping the ruby image version 
 
 # version 3.0.6
+- improve development mode 
+- remove old script findPublicationsToUpdate.sh2
