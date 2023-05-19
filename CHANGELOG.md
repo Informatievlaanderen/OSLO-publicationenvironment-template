@@ -34,3 +34,6 @@
 # version 3.0.6
 - improve development mode 
 - remove old script findPublicationsToUpdate.sh2
+- introduce improvement case of wegenenenverkeer.data.vlaanderen.be 
+    copy only the parts from the Thema repository that are relevant for the processing of the publication point.
+    I.e. not the directories codelijsten and site-skeleton subdirectories of other specifications 
