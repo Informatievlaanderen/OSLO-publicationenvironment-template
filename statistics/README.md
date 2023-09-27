@@ -28,3 +28,25 @@ It contains a CIRCLECI flow that will execute the scripts in the directory repor
 - (feature) create a evolution statistics: 
      - difference compared last month 
      - difference compared last 12 months (a year back in time)
+
+       Some notes: 
+          - date arithmatic: date --date 'March 1, 2015 +7 days'
+	  - git checkout w.r.t. a date: git checkout `git rev-list -n 1 --first-parent --before="2020-07-27" main`
+          - use the scripts/downloadGitHubfile.sh
+
+       Solution approach:
+          - 1. download the aggr statistics for previous date
+          - 2. make a diff statistics
+                  [{
+                    "history" : "- 1 month",
+                    "downloadURL" : "raw_url",
+                    "difference" : {
+                        "authors" : 10 // 10 more authors,
+                        "editors" : -4 // 4 less editors
+                        ..
+                        }
+                   },.. ]
+            
+            Creating a list of diff statistics allows to create a view back in time.
+
+
