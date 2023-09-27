@@ -1,0 +1,9 @@
+{
+  "statisticsrepository" : {
+	  "organisation": "GitHubOrganisation",
+	  "repository" : "GeneratedRepository",
+	  "private" : false,
+	  "gitEmail" : "toolchain@dev.specs.org",
+	  "gitUser" : "toolchain"
+  }
+}

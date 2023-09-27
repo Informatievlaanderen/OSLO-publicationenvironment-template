@@ -1,0 +1,104 @@
+version: 2.1
+
+jobs:
+  build-stats:
+      generatedReporFingerprint:
+        type: string
+    docker:
+      - image: cimg/node:18.18
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - add_ssh_keys:
+          fingerprints:
+            - << parameters.generatedReporFingerprint >>
+      - run:
+          name: build the statistics per specifications
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            pushd ${CIRCLEWKD}/report
+            make allstats
+      - run:
+          name: build the statistics
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            pushd ${CIRCLEWKD}/report
+            make aggr.stat
+      - run:
+          name: clean up
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            pushd ${CIRCLEWKD}/report
+            make finalize
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - stats/
+  create-artifact:
+    parameters:
+      repository:
+        type: string
+      generatedReporFingerprint:
+        type: string
+    docker:
+      - image: cimg/node:18.18
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - add_ssh_keys:
+          fingerprints:
+            - << parameters.generatedReporFingerprint >>
+      - run:
+          name: Checkout target repo
+          workdir: /tmp
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            rm -rf statistics
+            export REPO=$(jq -r .statisticsrepository $PWD/statistics/config.json)
+            $PWD/scripts/checkoutRepoGithub.sh "${REPO}" /tmp/statistics ${PAT_TOKEN}
+      - run:
+          name: clean the statistics directory
+          workdir: /tmp/statistics
+          command: |
+            git fetch origin
+            git checkout -b "${CIRCLE_BRANCH}" --track "origin/${CIRCLE_BRANCH}" || git checkout "${CIRCLE_BRANCH}"
+      - run:
+          name: Copy generated assets
+          workdir: /tmp/workspace
+          command: |
+            mkdir -p /tmp/statistics/report
+            if [ -d stats ] ; then if [ ! "$(ls -A stats )" ] ; then echo "directory stats is empty" ; else pushd stats ; cp -r * /tmp/statistics/ ; popd ; fi fi
+      - run:
+          name: insert the commit
+          workdir: /tmp/statistics
+          command: |
+            export TAG=`echo "${CIRCLE_SHA1}" | cut -c1-15`
+            echo "{\"commit\" : \"$TAG\"}" > report/commit.json
+      - run:
+          name: Push results to github
+          workdir: /tmp/statistics
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            export EMAIL=$(jq -r .statisticsrepository.gitEmail $CIRCLEWKD/statistics/config.json)
+            export USER=$(jq -r .statisticsrepository.gitUser $CIRCLEWKD/statistics/config.json)
+            git config user.email "${EMAIL}"
+            git config user.name "${USER}"
+            git add .
+            git status
+            git commit -m "Applying changes from commit ${CIRCLE_SHA1}" --allow-empty
+            export TAG=`echo "${CIRCLE_SHA1}" | cut -c1-15`
+            git tag "${TAG}"
+            git push --force origin "${CIRCLE_BRANCH}"
+            git push --tags
+workflows:
+  version: 2
+  generate_documentation:
+    jobs:
+      - build-stats:
+          generatedReporFingerprint: "$$SSHKEYFINGERPRINT"
+      - create-artifact:
+          generatedReporFingerprint: "$$SSHKEYFINGERPRINT"
+          requires:
+            - build-stats
