@@ -12,3 +12,4 @@ mkdir -p ${TARGET}/.circleci
 cp -r circleci/* ${TARGET}/.circleci
 mkdir -p ${TARGET}/report
 cp -r report/* ${TARGET}/report
+cp ../../scripts/downloadFileGithub.sh ${TARGET}/report

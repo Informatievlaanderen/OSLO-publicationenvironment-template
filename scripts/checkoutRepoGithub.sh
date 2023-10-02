@@ -9,6 +9,9 @@ set -x
 # arg1 = the description of the file
 # arg2 = the target where the downloaded file has to be written
 # arg3 = the PAT from a user having access to the repository
+#    
+# for more information on PAT (Personal Access Token) see 
+# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
 
 # The input json structure is of the form
 # {

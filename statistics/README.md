@@ -23,6 +23,7 @@ It contains a CIRCLECI flow that will execute the scripts in the directory repor
 
 ## TODO
 
+- check if datatypes are included in the statistics
 - test the CIRCLECI configuration and deployment instructions for private statistics repository
 - do not copy intermediate files of the aggregated statistics
 - (feature) create a evolution statistics: 

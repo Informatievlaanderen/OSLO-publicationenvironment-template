@@ -95,15 +95,39 @@ aggr.specstats: ${STATSPERSPECIFICATIONS}
 	 done 
 	 cp $@ ${TARGETDIR}/$@
 
+
+
 aggr.stat: aggr.organisations aggr.class aggr.props aggr.extclass aggr.extprops aggr.authors aggr.editors aggr.contributors aggr.specstats
 	./calc_aggr.sh aggr ${TARGETDIR}/$@
 
+
+# historic differences
+#
+
+diff.stat: aggr.stat
+	./calc_diff.sh aggr.stat "-1 hour"  diff.1hour
+	./calc_diff.sh aggr.stat "-1 month" diff.1month	
+	./calc_diff.sh aggr.stat "-1 year"  diff.1year
+
+
+
+
+CLEANAGGR=aggr.organisations aggr.authors aggr.editors aggr.contributors aggr.specstats
 
 finalize:
 	for file in "${CLEANSTATSPERSPECIFICATIONS}" ; \
 		do \
 		rm $${file} ;\
-	 done 
+	done 
+	for file in "${CLEANAGGR}" ; \
+		do \
+		rm ${TARGETDIR}/$${file} ;\
+	done 
+
+
+
+
+	
 
 print:
 	echo "${CLEANSTATSPERSPECIFICATIONS}" > L
