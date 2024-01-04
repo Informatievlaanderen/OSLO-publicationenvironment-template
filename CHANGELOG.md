@@ -54,3 +54,6 @@
 
 # version 3.1.2
 - bump image version numbers to latest
+- add parameter interpretation for generators:
+   - script defaults are overwritten by config.json config
+   - config.json defaults are overwritten by publication point config

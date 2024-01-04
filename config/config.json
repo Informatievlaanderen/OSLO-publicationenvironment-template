@@ -18,5 +18,11 @@
 	  "strickness" : "lazy",
 	  "version": 3,
 	  "triggerall" : true
+  },
+  "shaclgenerator" : {
+	  "parameters": "-m individual -c 'uniqueLanguages' -c 'nodeKind'"
+  },
+  "jsonldgenerator" : {
+	  "parameters" : "-d -l label"
   }
 }
