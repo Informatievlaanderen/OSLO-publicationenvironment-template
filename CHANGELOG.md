@@ -51,3 +51,6 @@
 # version 3.1.1
 - add support for statistics
 - add documentation reference for Personal Access Tokens (PAT)
+
+# version 3.1.2
+- bump image version numbers to latest
