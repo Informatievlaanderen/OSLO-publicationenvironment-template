@@ -22,7 +22,7 @@
   "shaclgenerator" : {
 	  "parameters": "-m individual -c 'uniqueLanguages' -c 'nodeKind'"
   },
-  "jsonldgenerator" : {
-	  "parameters" : "-d -l label"
+  "contextgenerator" : {
+	  "parameters" : "-c -l label"
   }
 }
