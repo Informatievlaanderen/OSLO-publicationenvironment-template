@@ -57,3 +57,4 @@
 - add parameter interpretation for generators:
    - script defaults are overwritten by config.json config
    - config.json defaults are overwritten by publication point config
+- add freeze and unfreeze supporting scripts
