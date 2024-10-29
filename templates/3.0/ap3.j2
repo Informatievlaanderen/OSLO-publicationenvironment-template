@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% set language = "nl" %}
-{% set sortattr = "sort_nl" %}
+{% set sortattr = "sort" %}
 
 <html xml:lang="nl" lang="nl" dir="ltr" typeof="bibo:Document " about="" property="dcterms:language" content="nl" prefix="dcterms: http://purl.org/dc/terms/ bibo: http://purl.org/ontology/bibo/ schema: http://schema.org/ w3p: http://www.w3.org/2001/02pd/rec54#" xmlns="http://www.w3.org/1999/xhtml">
 
@@ -25,9 +25,15 @@
   <meta name="msapplication-wide310x150logo" content="https://dij151upo6vad.cloudfront.net/2.latest/icons/app-icon/tile-wide.png" />
   <meta name="msapplication-square310x310logo" content="https://dij151upo6vad.cloudfront.net/2.latest/icons/app-icon/tile-large.png" />
   <meta name="msapplication-TileColor" content="#FFE615" />
+  <script src="https://prod.widgets.burgerprofiel.vlaanderen.be/api/v1/node_modules/@govflanders/vl-widget-polyfill/dist/index.js"></script>
 </head>
 
 <body>
+  <div style="min-height:44px;;" id="vlaanderen-header">
+    <!-- insert your global header here -->
+    <script src=https://prod.widgets.burgerprofiel.vlaanderen.be/api/v1/widget/b0dae312-e7a6-4612-978a-f0e3b2d975bf/embed></script>
+    <!-- end global header-->
+  </div>
 
   <!-- Start page content -->
   <div class="page">
@@ -42,10 +48,23 @@
           <div class="grid u-hr">
             <div class="col--9-12 col--1-1--s">
               <h1 class="h1">{{ metadata.title }}</h1>
+
+              <div class="head" role="status" id="status">
+              <dl>
+              <dt>Status</dt><dd><a href="{{metadata.status}}">{{metadata.status}}</a></dd>
+              <dt>Uitgegeven op</dt><dd>{{metadata.issued}}</dd>
+              <dt>Deze versie</dt><dd><a href="{{metadata.navigation.self}}">{{metadata.navigation.self}}</a></dd>
+              {% if metadata.navigation.next %}
+              <dt>Volgende versie</dt><dd><a href="{{metadata.navigation.next}}">{{metadata.navigation.next}}</a></dd>
+              {% endif %}
+              {% if metadata.navigation.prev %}
+              <dt>Vorige versie</dt><dd><a href="{{metadata.navigation.prev}}">{{metadata.navigation.prev}}</a></dd>
+              {% endif %}
+              </dl>
+              </div>
+
               <div class="head" role="contentinfo" id="respecHeader">
                 <dl>
-                  <dt>Laatste aanpassing</dt>
-                  <dd>{{ metadata.modified }}</dd>
                         {% for role, contributors in contributors | groupby("role") %}
                           {% if role == "A" %}
                             {% set authors = contributors|sort(attribute='last_name') %}
@@ -114,11 +133,29 @@
                       {% endfor %}
                 </dl>
               </div>
+
+              <div class="head" role="metainfo" id="metainfo">
+              <dl>
+              <dt>Brondata</dt><dd><a href="{{metadata.repositoryurl}}">{{metadata.repositoryurl}}</a></dd>
+              <dt>Changelog</dt><dd><a href="{{metadata.changelogurl}}.md">{{metadata.changelogurl}}.md</a></dd>
+              <dt>Opmerkingen en feedback</dt><dd><a href="{{metadata.feedbackurl}}">{{metadata.feedbackurl}}</a></dd>
+              <dt>Standaardenregister</dt><dd><a href="{{metadata.standaardregisterurl}}">{{metadata.standaardregisterurl}}</a></dd>
+
+              <dt>Afhankelijkheden</dt><dd>
+                {% for dep in metadata.dependencies %}
+		<a href="{{ dep.packageurl }}">{{ dep.packagelabel }}</a>
+                {% endfor %}
+		</dd>
+              </dl>
+              </div>
+
+
             </div>
           </div>
         </div>
       </div>
     </div>
+
     <div id="main" itemprop="mainContentOfPage" role="main" tabindex="-1" class="main-content">
       <div class="layout layout--wide">
         <div class="grid">
@@ -126,7 +163,7 @@
             <div class="region" id="introduction">
               <div class="introduction typography">
               {% block introduction %}
-                <p>Dit document beschrijft een <strong>applicatieprofiel</strong>, in dit geval <strong>{{ title }}</strong>.
+                <p>Dit document beschrijft een <strong>applicatieprofiel</strong>, in dit geval <strong>{{ metadata.title }}</strong>.
                 <!--Een applicatieprofiel is een specificatie die bestaande termen hergebruikt van verschillende basis-standaarden en daar meer specificiteit aan toevoegt.-->
                 <!-- Daarbij wordt het gebruik van de termen toegelicht voor de interbestuurlijke uitwisseling van overheidsinformatie.-->
                 Dit applicatieprofiel beantwoordt de vraag over hoe het corresponderende domeinmodel in de praktijk kan toegepast worden.
@@ -150,12 +187,11 @@
                 <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">Status van dit document</h2>
                 {% block status %}
                 <p>
-                  Dit applicatieprofiel dient om het specifieke gebruik van de entiteiten relevant voor de beschreven applicatie te verduidelijken.
+                  Dit applicatieprofiel heeft status <a href="{{metadata.status }}">{{ metadata.statuslabel }}</a> en werd uitgegeven op {{ metadata.issued }}.
+	        </p><p>
+                  Informatie over het gevolgde proces en de beslissingen om tot deze specificatie te komen zijn beschikbaar in het 
+                  <a href="{{metadata.standaardregisterurl}}">standaardenregister</a>.
                 </p>
-                <p>
-                Dit document werd als Kandidaat-standaard gepubliceerd door de werkgroep semantiek en bevindt zich in een evaluatieperiode. Indien de evaluatie positief beoordeeld wordt door het stuurorgaan Vlaams Informatie- en ICT-beleid op basis van een aantal referentie implementaties en het behandelen van eventuele feedback wordt dit document gepromoot tot Standaard in het beschreven domein.
-                </p>
-                <p>Feedback op deze specificatie kan gegeven worden via de <a href="mailto:oslo@kb.vlaanderen.be">mailing lijst</a> of als een topic in onze <a href="https://github.com/Informatievlaanderen/OSLO-Public-Discussion">publieke reviewdiscussielijst</a>.</p>
                 {% endblock %}
               </section>
             </div>
@@ -163,7 +199,7 @@
             <div class="region region--no-space-top typography" id="license">
               <h2 class="h2">Licentie</h2>
               {% block license %}
-              <p><span rel="dct:type" property="dct:title" href="http://purl.org/dc/dcmitype/Text" xmlns:dct="http://purl.org/dc/terms/">Deze specificatie</span> van <a rel="cc:attributionURL" property="cc:attributionName" href="http://vlaanderen.be/informatievlaanderen" xmlns:cc="http://creativecommons.org/ns#">Informatie Vlaanderen</a> is gepubliceerd onder de <a href="https://overheid.vlaanderen.be/sites/default/files/documenten/ict-egov/licenties/hergebruik/modellicentie_gratis_hergebruik_v1_0.html" rel="license">"Modellicentie Gratis Hergebruik - v1.0"</a>.</p>
+              <p><span rel="dct:type" property="dct:title" href="http://purl.org/dc/dcmitype/Text" xmlns:dct="http://purl.org/dc/terms/">Deze specificatie</span> van <a rel="cc:attributionURL" property="cc:attributionName" href="http://vlaanderen.be/informatievlaanderen" xmlns:cc="http://creativecommons.org/ns#">Informatie Vlaanderen</a> is gepubliceerd onder de <a href="{{ metadata.license }}" rel="license">"Modellicentie Gratis Hergebruik - v1.0"</a>.</p>
               {% endblock %}
             </div>
             <div class="region region--no-space-top typography" id="conformance">
@@ -203,9 +239,11 @@
             </div>
 
             <div class="region region--no-space-top">
-              <a href="{{ documentroot }}/html/overview.jpg" target="_blank">
+	      {% block images %}
+                     <a href="{{ documentroot }}/html/overview.jpg" target="_blank">
                  <img src="{{ documentroot }}/html/overview.jpg" />
               </a>
+              {% endblock %}
             </div>
             <div class="region region--no-space-top">
               <h2 class="h2">Entiteiten</h2>
@@ -217,7 +255,14 @@
                   <dl>
                     <dt>Beschrijving</dt><dd>{{ entity.description[language] }}</dd>
                     {% if entity.usage[language] %}
-                    <dt>Gebruik</dt><dd>{{ entity.usage[language] }}</dd>
+                    <dt>Gebruik</dt><dd>{{ entity.usage[language] | safe }}</dd>
+                    {% endif %}
+		    {% if ((entity.parents | length) > 0 ) %} 
+		    <dt>Subklasse van <dt><dd>
+                        {%- for parent in entity['parents'] %}
+                        <a href="{{ parent.scoped_uri}}">{{ parent.label }}</a>{% if not loop.last %}, {% endif %}
+                    	{%- endfor %}
+		   </dd>
                     {% endif %}
                     <dt>Eigenschappen</dt>
 		    {% if ((entity.properties | length) > 0 ) %} 
@@ -254,13 +299,17 @@
                           </code>
                         </td>
                         <td>
-                          {% for range in prop.range %}
-			    <a href="{{ range['range_uri'] }}" data-toggle="tooltip" data-content="{{ range['range_uri'] }}" data-placement="right">{{ range['range_label'] }}</a>
+                          {% for range in prop.scopedrange %}
+			    {% if range['range_uri'] == range['range_puri'] %} 
+			    <a href="{{ range['range_uri'] }}" data-toggle="tooltip" data-content="{{ range['range_puri'] }}" data-placement="right">{{ range['range_label'][language] }}</a>
+                            {% else %}
+			    <a href="{{ range['range_uri'] }}" data-placement="right">{{ range['range_label'][language] }}</a>
+			    {% endif %}
                           {% endfor %}
                         </td>
                         <td>{{ prop.cardinality }}</td>
                         <td property="rdfs:comment">{{ prop.description[language] }}</td>
-                        <td property="vann:usageNote">{{ prop.usage[language] }}</td>
+                        <td property="vann:usageNote">{{ prop.usage[language] | safe }}</td>
                         <td>{% if prop['codelist_uri'] %}<a href="{{ prop['codelist_uri'] }}">Link</a>{% endif %}</td>
                       </tr>
                     {% endfor %}
@@ -277,12 +326,23 @@
             </div>
             {% for entity in datatypes | sort(attribute=sortattr)%}
             <div class="region region--no-space-top">
+              {% if entity.scopeduri %}
+              <h3 class="h3" id="{{ entity.name }}"><a href="{{ entity.scopeduri }}" data-toggle="tooltip" data-content="{{ entity.uri }}" data-placement="right">{{ entity.label[language] }}</a></h3>
+	      {% else %}
               <h3 class="h3" id="{{ entity.name }}"><a href="{{ entity.uri }}" data-toggle="tooltip" data-content="{{ entity.uri }}" data-placement="right">{{ entity.label[language] }}</a></h3>
+	      {% endif %}
                 <div class="region region--no-space-top">
                   <dl>
                     <dt>Beschrijving</dt><dd>{{ entity.description[language] }}</dd>
                     {% if entity.usage[language] %}
-                    <dt>Gebruik</dt><dd>{{ entity.usage[language] }}</dd>
+                    <dt>Gebruik</dt><dd>{{ entity.usage[language] | safe }}</dd>
+                    {% endif %}
+		    {% if ((entity.parents | length) > 0 ) %} 
+		    <dt>Subklasse van <dt><dd>
+                        {%- for parent in entity['parents'] %}
+                        <a href="{{ parent.scoped_uri}}">{{ parent.label }}</a>{% if not loop.last %}, {% endif %}
+                    	{%- endfor %}
+		   </dd>
                     {% endif %}
                     <dt>Eigenschappen</dt>
 		    {% if ((entity.properties | length) > 0 ) %} 
@@ -318,13 +378,17 @@
                           </code>
                         </td>
                         <td>
-                          {% for range in prop.range %}
-			    <a href="{{ range['range_uri'] }}" data-toggle="tooltip" data-content="{{ range['range_uri'] }}" data-placement="right">{{ range['range_label'] }}</a>
+                          {% for range in prop.scopedrange %}
+			    {% if range['range_uri'] == range['range_puri'] %} 
+			    <a href="{{ range['range_uri'] }}" data-toggle="tooltip" data-content="{{ range['range_puri'] }}" data-placement="right">{{ range['range_label'][language] }}</a>
+                            {% else %}
+			    <a href="{{ range['range_uri'] }}" data-placement="right">{{ range['range_label'][language] }}</a>
+			    {% endif %}
                           {% endfor %}
                         </td>
                         <td>{{ prop['cardinality'] }}</td>
                         <td property="rdfs:comment">{{ prop.description[language] }}</td>
-                        <td property="vann:usageNote">{{ prop.usage[language] }}</td>
+                        <td property="vann:usageNote">{{ prop.usage[language] | safe }}</td>
                         <td>{% if prop['codelist_uri'] %}<a href="{{ prop['codelist_uri'] }}">Link</a>{% endif %}</td>
                       </tr>
                       {% endfor %}
@@ -337,8 +401,16 @@
             {% endif %}
             <div class="region region--no-space-top" id="jsonld">
                 <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">JSON-LD context</h2>
+                (niet normatief)
                 {% block jsonld %}
-                <p>Een herbruikbare JSON-LD context definitie voor dit applicatieprofiel is terug te vinden op: <a href="https://data.vlaanderen.be/context/" target="_blank">https://data.vlaanderen.be/context/</a></p>
+                <p>Een herbruikbare JSON-LD context definitie voor dit applicatieprofiel is terug te vinden op: <a href="{{ documentroot }}/context/{{ metadata.filename }}.jsonld" target="_blank">{{ documentroot }}/context/{{ metadata.filename }}.jsonld</a></p>
+                {% endblock %}
+            </div>
+            <div class="region region--no-space-top" id="shacl">
+                <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">SHACL template</h2>
+                (niet normatief)
+                {% block shacl%}
+                <p>Een herbruikbare SHACL template definitie voor dit applicatieprofiel is terug te vinden op: <a href="{{ documentroot }}/shacl/{{ metadata.filename }}-SHACL.ttl" target="_blank">{{ documentroot }}/shacl/{{ metadata.filename }}-SHACL.ttl</a></p>
                 {% endblock %}
             </div>
           </div>
@@ -368,6 +440,9 @@
                               <li class="side-navigation__item">
                                   <a href="#jsonld">JSON-LD Context</a>
                               </li>
+                              <li class="side-navigation__item">
+                                  <a href="#shacl">SHACL template</a>
+                              </li>
                           </ul>
                       </div>
                   </div>
@@ -377,6 +452,11 @@
       </div>
     </div>
   </div>
+  </div>
+  <div id="vlaanderen-footer">
+    <!-- insert your Vlaanderen-footer-code here -->
+    <script src=https://prod.widgets.burgerprofiel.vlaanderen.be/api/v1/widget/f1d7f80f-ad17-4f25-92b4-027a99785068/embed></script>
+    <!-- End global footer-->
   </div>
 
   <script src="https://dij151upo6vad.cloudfront.net/2.latest/js/vlaanderen-ui.js"></script>

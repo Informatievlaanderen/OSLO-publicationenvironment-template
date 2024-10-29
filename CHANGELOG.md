@@ -58,3 +58,19 @@
    - script defaults are overwritten by config.json config
    - config.json defaults are overwritten by publication point config
 - add freeze and unfreeze supporting scripts
+
+
+# version 4.0.0
+- Move away from the Java based OSLO toolchain to the Typescript based OSLO toolchain.
+- used libraries:
+  * https://www.npmjs.com/package/@oslo-flanders/core
+  * https://www.npmjs.com/package/@oslo-flanders/ea-uml-extractor
+  * https://www.npmjs.com/package/@oslo-flanders/ea-converter
+  * https://www.npmjs.com/package/@oslo-flanders/stakeholders-converter
+  * https://www.npmjs.com/package/@oslo-flanders/shacl-template-generator
+  * https://www.npmjs.com/package/@oslo-flanders/rdf-vocabulary-generator
+  * https://www.npmjs.com/package/@oslo-flanders/jsonld-context-generator
+  * https://www.npmjs.com/package/@oslo-flanders/json-webuniversum-generator
+  * https://www.npmjs.com/package/@oslo-flanders/html-respec-generator
+  * https://www.npmjs.com/package/@oslo-flanders/html-generator
+  * https://www.npmjs.com/package/@oslo-flanders/examples-generator

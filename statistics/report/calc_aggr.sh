@@ -30,14 +30,13 @@ NBTOTALTERMS=`jq -s '.[0] + .[1] + .[2] + .[3]  | unique | length' ${INPUT2} ${I
 
 # calculate the organisations
 
-#jq . ${INPUT1} > ${OUTPUT}.input
+#
+jq '[.[].names ]| flatten | unique '  ${INPUT1} > ${OUTPUT}.org.1
+jq 'group_by(.affiliation)' ${OUTPUT}.org.1 > ${OUTPUT}.org.2
+jq '[.[] | {"aff": .[0].affiliation, participants : .| length }]' ${OUTPUT}.org.2 > ${OUTPUT}.org.3
 
-jq ' group_by(.affiliation) ' ${INPUT1} > ${OUTPUT}.org.1
+NBTOTALORGANISATIONS=`jq 'length' ${OUTPUT}.org.3`
 
-jq ' [ .[] | { "affiliation" : .[0].affiliation , "participants": length } ] ' ${OUTPUT}.org.1 > ${OUTPUT}.org.2 
-NBTOTALORGANISATIONS=`jq 'length' ${OUTPUT}.org.2`
-
-rm ${OUTPUT}.org.1
 
 
 # calculate the specs
@@ -47,8 +46,8 @@ jq ' [ .[] | { "status" : .[0].status, "specifications": length } ] ' ${INPUT}.s
 
 jq ' [ .[] | { "status" : .[0].status, "specifications_years": ., "specifications" : length } ] ' ${INPUT}.specstats.1 > ${INPUT}.specstats.3 
 
-jq '[.[] |  .specifications_years[] |= . + { "year" :  .date | strptime("%Y-%m-%d") | strftime("%Y") }  ]' ${INPUT}.specstats.3 > ${INPUT}.specstats.4
-jq '[.[] |  .specifications_years[] |= . + { "month" :  .date | strptime("%Y-%m-%d") | strftime("%m") }  ]' ${INPUT}.specstats.4 > ${INPUT}.specstats.5
+jq '[.[] |  .specifications_years[] |= . + { "year" :  .issued | strptime("%Y-%m-%d") | strftime("%Y") }  ]' ${INPUT}.specstats.3 > ${INPUT}.specstats.4
+jq '[.[] |  .specifications_years[] |= . + { "month" :  .issued | strptime("%Y-%m-%d") | strftime("%m") }  ]' ${INPUT}.specstats.4 > ${INPUT}.specstats.5
 jq '[.[] |  .specifications_years |=  group_by(.year)  ]' ${INPUT}.specstats.5 > ${INPUT}.specstats.6
 jq '[.[] |  .specifications_years[] |= {"year" : .[0].year , "number" : length , "specs" : . } ]' ${INPUT}.specstats.6 > ${INPUT}.specstats.7
 jq '[.[] |  .specifications_years[].specs |= group_by(.month) ]' ${INPUT}.specstats.7 > ${INPUT}.specstats.8
@@ -76,12 +75,12 @@ jq ".properties = $NBPROPERTIES"       ${RESULT}.6 > ${RESULT}.7
 jq ".externalproperties = $NBEXTPROPERTIES" ${RESULT}.7 > ${RESULT}.8
 jq ".totalterms = $NBTOTALTERMS "      ${RESULT}.8 > ${RESULT}.9
 jq ".totalorganisations = $NBTOTALORGANISATIONS"      ${RESULT}.9 > ${RESULT}.10
-jq -s ".[0].organisations = .[1] | .[0] " ${RESULT}.10  ${OUTPUT}.org.2 > ${RESULT}.11
+jq -s ".[0].organisations = .[1] | .[0] " ${RESULT}.10  ${OUTPUT}.org.3 > ${RESULT}.11
 jq -s ".[0].specifications= .[1] | .[0] " ${RESULT}.11  ${INPUT}.specstats > ${RESULT}.12
 
 cp ${RESULT}.12 ${OUTPUT}
 rm ${RESULT}.*
 rm ${INPUT}.specstats
-rm ${OUTPUT}.org.2
+rm ${OUTPUT}.org.*
 
 

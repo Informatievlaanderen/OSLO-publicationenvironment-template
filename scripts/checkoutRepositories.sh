@@ -4,6 +4,8 @@ PUBCONFIG=$2
 ROOTDIR=$1
 CONFIGDIR=$3
 
+PROJECTDIR_DEFAULT=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+
 # some test calls
 #jq -r '.[] | @sh "echo \(.urlref)"' publication.config | bash -e
 #jq -r '.[] | @sh "./checkout-one.sh \(.)"' publication.config | bash -e
@@ -46,9 +48,9 @@ cleanup_directory() {
   if [[ -f ".names.txt" && -f $MAPPINGFILE ]]
   then
     STR=".[] | select(.name == \"$(cat .names.txt)\") | [.]"
-    jq "${STR}" ${MAPPINGFILE} >.map.json
-    jq -r '.[] | @sh "find . -name \"*.eap\" !  -name \(.eap) -type f -exec rm -f {} + "' .map.json | bash -e
-    SITE=`jq -r .[].site .map.json`
+    jq "${STR}" ${MAPPINGFILE} >.names.json
+    jq -r '.[] | @sh "find . -name \"*.eap\" !  -name \(.eap) -type f -exec rm -f {} + "' .names.json | bash -e
+    SITE=`jq -r .[].site .names.json`
     find ./site-skeleton -depth -type d ! -wholename "./site-skeleton"  ! -wholename "./${SITE}" -exec rm -rf {} + 
   fi
 }
@@ -97,12 +99,15 @@ then
 
       echo "start processing (repository): $(_jq '.repository') $(_jq '.urlref') $MAIN"
 
+
       DIR=$(_jq '.urlref')
       NAME=$(_jq '.name')
       RDIR=${DIR#'/'}
       mkdir -p $ROOTDIR/$MAIN/$RDIR
       mkdir -p $ROOTDIR/target/$RDIR
       mkdir -p $ROOTDIR/report/$RDIR
+      
+
 
       git_download $ROOTDIR/$MAIN/$RDIR
 #      git clone $(_jq '.repository') $ROOTDIR/$MAIN/$RDIR
@@ -114,7 +119,20 @@ then
 #        echo "failed: $ROOTDIR/$MAIN/$RDIR $(_jq '.branchtag')" >>$ROOTDIR/failed.txt
 #      fi
 
+      # branchtag check: if the processing is strict then the checkout of a branch is forbidden (e.g. production)
+      #
+      BRANCHTAG=$(_jq '.branchtag')
+      ${PROJECTDIR_DEFAULT}/scripts/validateBranchtagGithub.sh $ROOTDIR/$MAIN/$RDIR ${BRANCHTAG} &> /tmp/validationBranchtag
+      echo "The provided branchtag ${BRANCHTAG} is a real commit, not a branch: " 
+      cat /tmp/validationBranchtag
+      echo "  "
+      VALIDBRANCHTAG=$( cat /tmp/validationBranchtag )
+      if [ "${VALIDBRANCHTAG}" != "true" ] ; then
+	      echo "Error: the branchtag ${BRANCHTAG} is a branch. It should be a real commit or tag" > ${ROOTDIR}/${MAIN}/${RDIR}/branchtag.report.md
+      fi
+
       pushd $ROOTDIR/$MAIN/$RDIR
+      
 
       # Save the Name points to be processed
       if [[ ! -z "$NAME" && "$NAME" != "null" ]]

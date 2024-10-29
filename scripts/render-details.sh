@@ -164,7 +164,7 @@ render_html() { # SLINE TLINE JSON
 
     echo "RENDER-DETAILS(language html): node /app/html-generator2.js -s ${TYPE} -i ${MERGEDJSONLD} -x ${RLINE}/html-nj_${LANGUAGE}.json -r /${DROOT} -t ${TEMPLATELANG} -d ${SLINE}/templates -o ${OUTPUT} -m ${LANGUAGE} -e ${RRLINE}"
 
-    if ! node /app/html-generator2.js -h https://implementatie.data.vlaanderen.be -s ${TYPE} -i ${MERGEDJSONLD} -x ${RLINE}/html-nj_${LANGUAGE}.json -r /${DROOT} -t ${TEMPLATELANG} -d ${SLINE}/templates -o ${OUTPUT} -m ${LANGUAGE} -e ${RRLINE}; then
+    if ! node /app/html-generator2.js -h ${HOSTNAME} -s ${TYPE} -i ${MERGEDJSONLD} -x ${RLINE}/html-nj_${LANGUAGE}.json -r /${DROOT} -t ${TEMPLATELANG} -d ${SLINE}/templates -o ${OUTPUT} -m ${LANGUAGE} -e ${RRLINE}; then
         echo "RENDER-DETAILS(language html): rendering failed"
 	execution_strickness
     else
@@ -217,7 +217,7 @@ render_example_template() { # SLINE TLINE JSON
 
     OUTPUT=/tmp/workspace/examples/${DROOT}
     mkdir -p ${OUTPUT}
-    mkdir -p ${OUTPUT}/context
+    mkdir -p ${OUTPUT}/context  
     touch ${OUTPUT}/.gitignore
 
     COMMANDJSONLD=$(echo '.[].translation | .[] | select(.language | contains("'${LANGUAGE}'")) | .mergefile')
@@ -342,8 +342,6 @@ render_shacl_languageaware() {
     local GOALLANGUAGE=$6
     local PRIMELANGUAGE=${7-false}
 
-
-${PARAMETERS} 
     FILENAME=$(jq -r ".name" ${JSONI})
     COMMANDJSONLD=$(echo '.[].translation | .[] | select(.language | contains("'${GOALLANGUAGE}'")) | .mergefile')
     LANGUAGEFILENAMEJSONLD=$(jq -r "${COMMANDJSONLD}" ${SLINE}/.names.json)

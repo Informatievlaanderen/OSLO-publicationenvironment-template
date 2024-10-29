@@ -63,7 +63,7 @@
     <div class="page">
       <div class="layout layout--wide">
         <div class="skiplink">
-          <a rel="nofollow noreferrer" href="#main">Skip this section and go to general content</a>
+          <a rel="nofollow noreferrer" href="#main">Direkt zum Inhalt</a>
         </div>
       </div>
       <div class="page">
@@ -74,18 +74,18 @@
                 <h1 class="h1">{{ data.metadata.title }}</h1>
                 {% if data.metadata.autotranslate %}
                   <div class="disclaimer">
-                    <p>This document is a translation from {{data.metadata.primaryLanguage}} to English. </p>
+                    <p>Dieses Dokument ist eine Übersetzung von {{data.metadata.primaryLanguage}} ins Deutsche. </p>
                   </div>
                 {% endif %}
                 <div class="head" role="contentinfo" id="respecHeader">
                   <h1 class="h1 title p-name" property="dcterms:title" id="title">{{ metadata.title }}</h1>
                   {% if metadata.prefix %}
-                    <h2 class="h2" id="subtitle" property="bibo:subtitle">Specification of
+                    <h2 class="h2" id="subtitle" property="bibo:subtitle">Spezifizierung von
                       <em>{{ metadata.prefix }}</em>
                     </h2>
                   {% endif %}
                   <dl>
-                    <dt>Authors</dt>
+                    <dt>Autoren</dt>
                     {% set sortedAuthors = (data.stakeholders.authors | sort(attribute='lastName')) %}
                     {% for author in sortedAuthors %}
                       <dd inlist="" rel="foaf:maker" class="p-author h-card vcard">
@@ -106,7 +106,7 @@
                         </span>
                       </dd>
                     {% endfor %}
-                    <dt>Editors</dt>
+                    <dt>Herausgeber</dt>
                     {% set sortedEditors = (data.stakeholders.editors | sort(attribute='lastName')) %}
                     {% for editor in sortedEditors %}
                       <dd inlist="" rel="foaf:maker" class="p-author h-card vcard">
@@ -127,7 +127,7 @@
                         </span>
                       </dd>
                     {% endfor %}
-                    <dt>Contributors</dt>
+                    <dt>Mitarbeiter</dt>
                     {% set sortedContributors = (data.stakeholders.contributors | sort(attribute='lastName')) %}
                     {% for contributor in sortedContributors %}
                       <dd inlist="" rel="foaf:maker" class="p-author h-card vcard">
@@ -162,19 +162,20 @@
               <div class="region" id="introduction">
                 <div class="introduction typography">
                   {% block introduction %}
-                    <p>This document describes an
-                      <strong>implementation model</strong>, in this case 
+                    <p>In diesem Dokument wird ein
+                      <strong>Anwendungsprofil</strong> beschrieben, in diesem Fall
                       <strong>
                         {{ data.metadata.title }}</strong>. <!-- Een applicatieprofiel is een specificatie die bestaande termen hergebruikt van verschillende basis-standaarden en
                           daar meer specificiteit aan toevoegt. -->
                       <!-- Daarbij wordt het gebruik van de termen toegelicht voor de interbestuurlijke uitwisseling van overheidsinformatie.
                       -->
-                    An implementation model is an application of vocabularies for a concrete purpose. It describes in all detail (such as cardinalities, code lists, data types, etc.) the desired data structure. 
+                    Dieses Anwendungsprofil beantwortet die Frage, wie das entsprechende Domänenmodell in der Praxis angewendet werden kann. 
+                    Darüber hinaus werden die Einschränkungen (Kardinalität, Codelisten) erläutert und die entsprechenden (RDF) Begriffe aufgelistet.
                   </p>
                 {% endblock %}
               </div>
               </div>
-                <div class="region region--no-space-top typography" id="summary"> <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">Summary</h2>
+                <div class="region region--no-space-top typography" id="summary"> <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">Zusammenfassung</h2>
                 {% block summary %}
                   {% if data.metadata.description %}
                     {{ data.metadata.description[language] }}
@@ -183,60 +184,60 @@
               </div>
               <div class="region region--no-space-top typography" id="status">
                 <section class="introductory" id="sotd" typeof="bibo:Chapter" resource="#ref" rel="bibo:Chapter">
-                  <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">Status of this document</h2>
+                  <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">Status dieses Dokuments</h2>
                   {% block status %}
                     <p>
-                      This implementation model has the status
+                     Dieses Anwendungsprofil hat den Status
                       <a href="{{ data.metadata.status }}">
                         {{ data.metadata.statuslabel }}</a>
-                       published at {{ data.metadata.issued }}.
+                      und wurde veröffentlicht am {{ data.metadata.issued }}.
                     </p>
                     <p>
-                      Information about the process and the decisions involved in the creation of this specification are consultable at the 
-                      <a href="{{ data.metadata.standaardregisterurl }}">registry of standards</a>.
+                      Informationen über den angewandten Prozess und die Entscheidungen, um zu dieser Spezifikation zu gelangen, sind im  
+                      <a href="{{ data.metadata.standaardregisterurl }}">Normenregister</a> verfügbar.
                     </p>
                   {% endblock %}
                 </section>
               </div>
               <div class="region region--no-space-top typography" id="license">
-                <h2 class="h2">License</h2>
+                <h2 class="h2">Lizenz</h2>
                 {% block license %}
                   <p>
                     <span rel="dct:type" property="dct:title" href="http://purl.org/dc/dcmitype/Text" xmlns:dct="http://purl.org/dc/terms/">
-                      This specification</span>
-                    of
+                      Diese Spezifikation </span>
+                    von
                     <a
                       rel="cc:attributionURL"
                       property="cc:attributionName"
                       href="https://data.vlaanderen.be/id/organisatie/OVO002949"
                       xmlns:cc="http://creativecommons.org/ns#">Digitaal Vlaanderen</a>
-                    is published under 
+                    wird unter dem
                     <a
                       href="https://overheid.vlaanderen.be/sites/default/files/documenten/ict-egov/licenties/hergebruik/modellicentie_gratis_hergebruik_v1_0.html"
-                      rel="license">"Model License Free Reuse - v1.0"</a>.</p>
+                      rel="license">"Modelllizenz Kostenlose Wiederverwendung - v1.0"</a>.</p>
                 {% endblock %}
               </div>
               <div class="region region--no-space-top typography" id="conformance">
-                <h2 class="h2" id="conformance" aria-level="1" role="heading">Conformance</h2>
+                <h2 class="h2" id="conformance" aria-level="1" role="heading">Übereinstimmung</h2>
                 {% block conformance %}
-                  <p>An implementation is conformant with this implementation model if it satifies 
-                    <a href="/doc/begeleidend/implementatiemodellen/conformiteit">these rules</a>
+                  <p>Die Compliance für Anwendungsprofile finden Sie 
+                    <a href="/doc/begeleidend/applicatieprofielen/conformiteit">hier</a>
                     .</p>
                 {% endblock %}
               </div>
               <div class="region region--no-space-top" id="overview">
-                <h2 class="h2">Overview</h2>
+                <h2 class="h2">Überblick</h2>
                 {% if data.metadata.autotranslate %}
                   <div class="disclaimer">
-                    <p>This document is a translation from {{data.metadata.primaryLanguage}} to English. </p>
-                    <br>
+                    <p>Dieses Dokument ist eine Übersetzung von {{data.metadata.primaryLanguage}} ins Deutsche. </p>
+                    <br>                    
                   </div>
                 {% endif %}
-                <div class="grid">
+                <div class="grid"></div>
                   <div class="col--9-12 col--1-1--s typography">
                     {% if ( ( data.entities | length > 0)   ) %}
                       <div class="region region--no-space-top">
-                        <p>This document describes the usage of the following entities for a correct usage of the Implementation Model:  <br/> |
+                        <p>In diesem Dokument wird die korrekte Verwendung der folgenden Entitäten erläutert: <br/> |
                           {%- for entity in data.entities %}
                             <a href="#{{ entity.applicationProfileLabel[language] }}">
                               {{ entity.applicationProfileLabel[language] }}</a>
@@ -245,11 +246,11 @@
                         </p>
                       </div>
                     {% endif %}
-                    {% if ( ( data.scopedDataTypes | length ) > 0 ) %}
+                    {% if ( ( data.dataTypes | length ) > 0 ) %}
                       <div class="region region--no-space-top">
                         <p>
-                          This document describes the usage of the following datatypes for a correct usage of the Implementation Model:<br/> |
-                          {%- for dataType in data.scopedDataTypes %}
+                          In diesem Dokument werden die folgenden Datentypen erläutert: <br/> |
+                          {%- for dataType in data.dataTypes %}
                             <a href="#{{ dataType.applicationProfileLabel[language] | replace(' ', '') }}">
                               {{ dataType.applicationProfileLabel[language] }}</a>
                             |
@@ -268,7 +269,7 @@
                 {% endblock %}
               </div>
               <div class="region region--no-space-top">
-                <h2 class="h2">Entities</h2>
+                <h2 class="h2">Entitäten</h2>
               </div>
               {% for entity in data.entities %}
                 <div class="region region--no-space-top">
@@ -278,18 +279,18 @@
                   </h3>
                   <div class="region region--no-space-top">
                     <dl>
-                      <dt>Description</dt>
+                      <dt>Beschreibung</dt>
                       <dd>
                         {{ entity.applicationProfileDefinition[language] }}
                       </dd>
                       {% if entity.usage[language] %}
-                        <dt>Usage</dt>
+                        <dt>Gebrauchen</dt>
                         <dd>
                           {{ entity.applicationProfileUsageNote[language] | safe }}
                         </dd>
                       {% endif %}
                       {% if ((entity.parents | length) > 0 ) %}
-                        <dt>Subclass of
+                        <dt>Unterklasse von
                           <dt>
                             <dd>
                               {%- for parent in entity['parents'] %}
@@ -300,9 +301,9 @@
                               {%- endfor %}
                             </dd>
                           {% endif %}
-                          <dt>Properties</dt>
+                          <dt>Eigenschaften</dt>
                           {% if ((entity.properties | length) > 0 ) %}
-                            <dd>For this entity the following properties are defined:
+                            <dd>Die folgenden Eigenschaften sind für diese Entität definiert:
                               {%- for prop in entity['properties'] %}
                                 <a href="#{{ (entity.applicationProfileLabel[language] ~ ':' ~ prop.applicationProfileLabel[language]) | urlencode }}">{{ prop.applicationProfileLabel[language] }}</a>
                                 {% if not loop.last %},
@@ -310,7 +311,7 @@
                               {%- endfor %}.
                             </dd>
                           {% else %}
-                            <dd>No properties have been defined for this entity.</dd>
+                            <dd>Für diese Entität sind keine Eigenschaften definiert.</dd>
                           {% endif %}
                         </dl>
                       </div>
@@ -319,12 +320,12 @@
                           <table class="data-table">
                             <thead>
                               <tr class="data-table__header">
-                                <th class="data-table__header-title--sortable data-table__header-title--sortable-active">Property</th>
-                                <th class="data-table__header-title--sortable">Expected Range</th>
-                                <th class="data-table__header-title--sortable">Cardinality</th>
-                                <th class="data-table__header-title--sortable">Description</th>
-                                <th class="data-table__header-title--sortable">Usage</th>
-                                <th class="data-table__header-title--sortable">Codelist</th>
+                                <th class="data-table__header-title--sortable data-table__header-title--sortable-active">Eigentum</th>
+                                <th class="data-table__header-title--sortable">Erwarteter Typ</th>
+                                <th class="data-table__header-title--sortable">Mächtigkeit</th>
+                                <th class="data-table__header-title--sortable">Beschreibung</th>
+                                <th class="data-table__header-title--sortable">Gebrauchen</th>
+                                <th class="data-table__header-title--sortable">Code-Liste</th>
                               </tr>
                             </thead>
                             <tbody class="supertype">
@@ -369,11 +370,11 @@
                       {% endif %}
                     </div>
                   {% endfor %}
-                  {% if data.scopedDataTypes %}
+                  {% if data.dataTypes %}
                     <div class="region region--no-space-top">
-                      <h2 class="h2">Datatypes</h2>
+                      <h2 class="h2">Datentypen</h2>
                     </div>
-                    {% for dataType in data.scopedDataTypes %}
+                    {% for dataType in data.dataTypes %}
                       <div class="region region--no-space-top">
                         <h3 class="h3" id="{{ dataType.id }}">
                           <a href="{{ dataType.id }}" data-toggle="tooltip" data-content="{{ dataType.id }}" id="{{ dataType.applicationProfileLabel[language] | replace(' ', '') }}" data-placement="right">
@@ -381,18 +382,18 @@
                         </h3>
                         <div class="region region--no-space-top">
                           <dl>
-                            <dt>Description</dt>
+                            <dt>Beschreibung</dt>
                             <dd>
                               {{ dataType.applicationProfileDefinition[language] }}
                             </dd>
                             {% if dataType.usage[language] %}
-                              <dt>Usage</dt>
+                              <dt>Verwendung</dt>
                               <dd>
                                 {{ dataType.applicationProfileUsageNote[language] | safe }}
                               </dd>
                             {% endif %}
                             {% if ((dataType.parents | length) > 0 ) %}
-                              <dt>Subclass of 
+                              <dt>Unterklasse von
                                 <dt>
                                   <dd>
                                     {%- for parent in dataType['parents'] %}
@@ -403,9 +404,9 @@
                                     {%- endfor %}
                                   </dd>
                                 {% endif %}
-                                <dt>Properties</dt>
+                                <dt>Eigenschaften</dt>
                                 {% if ((dataType.properties | length) > 0 ) %}
-                                  <dd>We have defined the following properties for this datatype:
+                                  <dd>Für diesen Datentyp sind die folgenden Eigenschaften definiert:
                                     {%- for prop in dataType['properties'] %}
                                       <a href="#{{ (dataType.applicationProfileLabel[language] ~ ':' ~ prop.applicationProfileLabel[language]) | replace(' ', '')
                                         |urlencode }}">{{ prop.applicationProfileLabel[language] }}</a>
@@ -414,7 +415,7 @@
                                     {%- endfor %}.
                                   </dd>
                                 {% else %}
-                                  <dd>There are no properties defined for this datatype.</dd>
+                                  <dd>Für diesen Datentyp wurden keine Eigenschaften definiert.</dd>
                                 {% endif %}
                               </dl>
                             </div>
@@ -423,12 +424,12 @@
                                 <table class="data-table">
                                   <thead>
                                     <tr class="data-table__header">
-                                      <th class="data-table__header-title--sortable data-table__header-title--sortable-active">Property</th>
-                                      <th class="data-table__header-title--sortable">Expects Type</th>
-                                      <th class="data-table__header-title--sortable">Cardinality</th>
-                                      <th class="data-table__header-title--sortable">Description</th>
-                                      <th class="data-table__header-title--sortable">Usage</th>
-                                      <th class="data-table__header-title--sortable">Codelist</th>
+                                      <th class="data-table__header-title--sortable data-table__header-title--sortable-active">Eigentum</th>
+                                      <th class="data-table__header-title--sortable">Erwarteter Typ</th>
+                                      <th class="data-table__header-title--sortable">Mächtigkeit</th>
+                                      <th class="data-table__header-title--sortable">Beschreibung</th>
+                                      <th class="data-table__header-title--sortable">Gebrauchen</th>
+                                      <th class="data-table__header-title--sortable">Code-Liste</th>
                                     </tr>
                                   </thead>
                                   <tbody class="supertype">
@@ -475,20 +476,20 @@
                         {% endfor %}
                       {% endif %}
                       <div class="region region--no-space-top" id="jsonld">
-                        <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">JSON-LD context</h2>
-                        (non-normative)
+                        <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">JSON-LD-Kontext</h2>
+                        (nicht normativ)
                         {% block jsonld %}
-                          <p>A reusable JSON-LD context definition for this implementation model is retrievable at: 
+                          <p>Eine wiederverwendbare JSON-LD-Kontextdefinition für dieses Anwendungsprofil finden Sie unter:
                             <a href="{{ metadata.documentroot }}/context/{{ data.metadata.filename }}.jsonld" target="_blank">
                               {{ metadata.documentroot }}/context/ {{ data.metadata.filename }}.jsonld</a>
                           </p>
                         {% endblock %}
                       </div>
                       <div class="region region--no-space-top" id="shacl">
-                        <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">SHACL template</h2>
-                        (non-normative)
+                        <h2 class="h2" aria-level="1" role="heading" id="h2_sotd">SHACL-Vorlage</h2>
+                        (nicht normativ)
                         {% block shacl %}
-                          <p>A reusable SHACL template for this implementation model is retrievable at: 
+                          <p>Eine wiederverwendbare SHACL-Vorlagendefinition für dieses Anwendungsprofil finden Sie unter:
                             <a href="{{ metadata.documentroot }}/shacl/{{ data.metadata.filename }}-SHACL.ttl" target="_blank">
                               {{ metadata.documentroot }}/shacl/ {{ data.metadata.filename }}-SHACL.ttl</a>
                           </p>
@@ -501,28 +502,28 @@
                           <div class="side-navigation__group">
                             <ul>
                               <li class="side-navigation__item">
-                                <a href="#introduction">Introduction</a>
+                                <a href="#introduction">Einleitung</a>
                               </li>
                               <li class="side-navigation__item">
-                                <a href="#summary">Summary</a>
+                                <a href="#summary">Zusammenfassung</a>
                               </li>
                               <li class="side-navigation__item">
-                                <a href="#status">Status of this document</a>
+                                <a href="#status">Status dieses Dokuments</a>
                               </li>
                               <li class="side-navigation__item">
-                                <a href="#license">License</a>
+                                <a href="#license">Lizenz</a>
                               </li>
                               <li class="side-navigation__item">
-                                <a href="#conformance">Conformance</a>
+                                <a href="#conformance">Übereinstimmung</a>
                               </li>
                               <li class="side-navigation__item">
-                                <a href="#overview">Overview</a>
+                                <a href="#overview">Überblick</a>
                               </li>
                               <li class="side-navigation__item">
-                                <a href="#jsonld">JSON-LD Context</a>
+                                <a href="#jsonld">JSON-LD-Kontext</a>
                               </li>
                               <li class="side-navigation__item">
-                                <a href="#shacl">SHACL template</a>
+                                <a href="#shacl">SHACL-Vorlage</a>
                               </li>
                             </ul>
                           </div>

@@ -3,6 +3,14 @@
 TARGETDIR=/tmp/workspace
 CHECKOUTFILE=${TARGETDIR}/checkouts.txt
 
+CONFIGDIR_DEFAULT=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+CONFIGDIR=${2:-$CONFIGDIR_DEFAULT/config}
+STRICT=$(jq -r .toolchain.strickness ${CONFIGDIR}/config.json)
+execution_strickness() {
+    if [ "${STRICT}" != "lazy" ]; then
+        exit -1
+    fi
+}
 #############################################################################################
 # extraction command functions
 
@@ -14,6 +22,10 @@ get_mapping_file() {
      exit 1
    fi
 }
+
+# MAPPINGFILE=$(get_mapping_file)   
+#  The usage of the above function would result in erroneous case that MAPPINGFILE="no mapping file available" 
+#  But that leads to problems in further processing
 
 #get_mapping_file() {
 #    local MAPPINGFILE="config/eap-mapping.json"
@@ -58,9 +70,14 @@ do
     if [ -d "${SLINE}" ]
     then
       pushd ${SLINE}
-       MAPPINGFILE=$(get_mapping_file)   
-       TDIR=${TARGETDIR}/target/${line}/html
-       copy_details $MAPPINGFILE $SLINE $TDIR
+       if [ -f .names.json ] ; then
+           MAPPINGFILE=".names.json"
+           TDIR=${TARGETDIR}/target/${line}/html
+           copy_details $MAPPINGFILE $SLINE $TDIR
+       else
+           echo "Error: no mapping file available. No skeleton data is copied."
+           execution_strickness
+       fi
       popd
     else
       echo "Error: ${SLINE}" 

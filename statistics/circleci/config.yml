@@ -2,34 +2,35 @@ version: 2.1
 
 jobs:
   build-stats:
-      generatedReporFingerprint:
-        type: string
     docker:
-      - image: cimg/node:18.18
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
     steps:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
       - add_ssh_keys:
           fingerprints:
-            - << parameters.generatedReporFingerprint >>
+            - "9c:16:8f:4a:b7:2c:b4:c1:ec:b8:68:03:99:10:17:a8"
       - run:
           name: build the statistics per specifications
           command: |
             export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            pushd ${CIRCLEWKD}/report
+            pushd ${CIRCLEWKD}/report4
             make allstats
+            make rootspecifications
       - run:
           name: build the statistics
           command: |
             export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            pushd ${CIRCLEWKD}/report
+            pushd ${CIRCLEWKD}/report4
             make aggr.stat
+            make root.stat
+            make csv.stat
       - run:
           name: clean up
           command: |
             export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            pushd ${CIRCLEWKD}/report
+            pushd ${CIRCLEWKD}/report4
             make finalize
       - persist_to_workspace:
           root: /tmp/workspace
@@ -39,25 +40,21 @@ jobs:
     parameters:
       repository:
         type: string
-      generatedReporFingerprint:
-        type: string
     docker:
-      - image: cimg/node:18.18
+      - image: cimg/node:20.15.0
     steps:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
       - add_ssh_keys:
           fingerprints:
-            - << parameters.generatedReporFingerprint >>
+            - "SHA256:0CS5iA9PxgCLEApmaNBHAQEXFnNmOu5W6UePx2o5uH4"
       - run:
           name: Checkout target repo
           workdir: /tmp
           command: |
-            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
             rm -rf statistics
-            export REPO=$(jq -r .statisticsrepository $PWD/statistics/config.json)
-            $PWD/scripts/checkoutRepoGithub.sh "${REPO}" /tmp/statistics ${PAT_TOKEN}
+            git clone <<parameters.repository>> statistics
       - run:
           name: clean the statistics directory
           workdir: /tmp/statistics
@@ -80,11 +77,8 @@ jobs:
           name: Push results to github
           workdir: /tmp/statistics
           command: |
-            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            export EMAIL=$(jq -r .statisticsrepository.gitEmail $CIRCLEWKD/statistics/config.json)
-            export USER=$(jq -r .statisticsrepository.gitUser $CIRCLEWKD/statistics/config.json)
-            git config user.email "${EMAIL}"
-            git config user.name "${USER}"
+            git config user.email "oslo@vlaanderen.be"
+            git config user.name "Circle CI Builder"
             git add .
             git status
             git commit -m "Applying changes from commit ${CIRCLE_SHA1}" --allow-empty
@@ -96,9 +90,8 @@ workflows:
   version: 2
   generate_documentation:
     jobs:
-      - build-stats:
-          generatedReporFingerprint: "$$SSHKEYFINGERPRINT"
+      - build-stats
       - create-artifact:
-          generatedReporFingerprint: "$$SSHKEYFINGERPRINT"
+          repository: git@github.com:Informatievlaanderen/data.vlaanderen.be-statistics.git
           requires:
             - build-stats
