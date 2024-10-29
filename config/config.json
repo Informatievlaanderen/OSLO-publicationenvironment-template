@@ -1,28 +1,34 @@
 {
-  "primeLanguage": "en",
-  "otherLanguages": [
-    "fr", "de"
-  ],
+  "primeLanguage": "nl",
+  "otherLanguages": ["en", "fr", "de"],
   "hostname": "https://dev.specs.org/",
   "domain": "data.spec.org",
-  "publicationpoints" : ["dev"],
-  "generatedrepository" : {
-	  "organisation": "GitHubOrganisation",
-	  "repository" : "GeneratedRepository",
-	  "private" : false,
-	  "gitEmail" : "toolchain@dev.specs.org",
-	  "gitUser" : "toolchain"
+  "publicationpoints": ["dev"],
+  "generatedrepository": {
+    "organisation": "GitHubOrganisation",
+    "repository": "GeneratedRepository",
+    "private": false,
+    "gitEmail": "toolchain@dev.specs.org",
+    "gitUser": "toolchain"
   },
-  "toolchainversion" : "3.1.2",
-  "toolchain" : {
-	  "strickness" : "lazy",
-	  "version": 3,
-	  "triggerall" : true
+  "translationrepository": {
+    "organisation": "GitHubOrganisation",
+    "repository": "GeneratedRepository",
+    "private": false,
+    "gitEmail": "toolchain@dev.specs.org",
+    "gitUser": "toolchain"
   },
-  "shaclgenerator" : {
-	  "parameters": "-m individual -c 'uniqueLanguages' -c 'nodeKind'"
+  "toolchainversion": "4.0.0",
+  "toolchain": {
+    "strickness": "lazy",
+    "version": 4,
+    "triggerall": true,
+    "autotranslate": false
   },
-  "contextgenerator" : {
-	  "parameters" : "-c -l label"
+  "shaclgenerator": {
+    "parameters-old": "-m individual -c 'uniqueLanguages' -c 'nodeKind'"
+  },
+  "contextgenerator": {
+    "parameters-old": "-c -l label"
   }
 }
