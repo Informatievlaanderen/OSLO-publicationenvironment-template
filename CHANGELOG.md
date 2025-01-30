@@ -58,3 +58,10 @@
    - script defaults are overwritten by config.json config
    - config.json defaults are overwritten by publication point config
 - add freeze and unfreeze supporting scripts
+
+# version 3.1.3
+- in CircleCI config:
+    - bump node image version 
+    - correct parameter name 
+    - correct workdir to working_directory 
+- fix incorrect hardcoded hostname 

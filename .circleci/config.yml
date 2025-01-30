@@ -4,7 +4,7 @@ commands:
 jobs:
   checkout:
     docker:
-      - image: cimg/node:18.16.0
+      - image: cimg/node:20.15.0
     steps:
       - checkout
 #      - add_ssh_keys:
@@ -19,8 +19,10 @@ jobs:
       - run: ls -al workspace
       - run:
           command: $PWD/scripts/findPublicationsToUpdate.sh /tmp/workspace $PWD/config/publication.json $PWD/
-      - run: 
+      - run:
           command: $PWD/scripts/checkoutRepositories.sh /tmp/workspace $PWD/config/publication.json $PWD/config
+      - run:
+          command: $PWD/scripts/upgrade_config-4.sh /tmp/workspace $PWD/config
       - run: if [ -e /tmp/workspace/checkouts.txt ] ; then cat /tmp/workspace/checkouts.txt ; fi
       - run: if [ -e /tmp/workspace/rawcheckouts.txt ] ; then cat /tmp/workspace/rawcheckouts.txt ; fi
       - run: if [ -e /home/circleci/project/changes.txt ] ; then cat /home/circleci/project/changes.txt ; fi
@@ -297,14 +299,14 @@ jobs:
             - target/
   expand-links:
     docker:
-      - image: cimg/node:18.16.0
+      - image: cimg/node:20.15.0
     steps:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run:
           name: Copy raw assets
-          workdir: /tmp/workspace
+          working_directory: /tmp/workspace
           command: |
             if [ -d raw ] ; then count="$( find raw -mindepth 1 -maxdepth 1 | wc -l )" ; if [ $count -ne 0 ] ; then cp -R raw/* /tmp/workspace/target/ ; fi  ; fi
       - run:
@@ -381,7 +383,7 @@ jobs:
             - target/
   copy-raw:
     docker:
-      - image: cimg/node:18.16.0
+      - image: cimg/node:20.15.0
     steps:
       - checkout
       - attach_workspace:
@@ -403,10 +405,10 @@ jobs:
             - raw/
   create-artifact:
     parameters:
-      generatedReporFingerprint:
+      generatedRepoFingerprint:
         type: string
     docker:
-      - image: cimg/node:18.16.0
+      - image: cimg/node:20.15.0
     steps:
       - checkout
       - attach_workspace:
@@ -414,7 +416,7 @@ jobs:
 
       - add_ssh_keys:
           fingerprints:
-            - << parameters.generatedReporFingerprint >>
+            - << parameters.generatedRepoFingerprint >>
       - run:
           name: update and add extra statements of updating the ssh config for each private ssh key
           command: |
@@ -428,7 +430,7 @@ jobs:
             $PWD/scripts/checkoutRepoGithub.sh "${REPO}" /tmp/generated ${TOOLCHAIN_TOKEN}
       - run:
           name: clean the generated directory
-          workdir: /tmp/generated
+          working_directory: /tmp/generated
           command: |
             git fetch origin
             git checkout -b "${CIRCLE_BRANCH}" --track "origin/${CIRCLE_BRANCH}" || git checkout "${CIRCLE_BRANCH}"
@@ -446,7 +448,7 @@ jobs:
            popd
       - run:
           name: Copy generated assets
-          workdir: /tmp/workspace
+          working_directory: /tmp/workspace
           command: |
             mkdir -p /tmp/generated/report
             if [ -d target ] ; then if [ ! "$(ls -A target)" ] ; then echo "directory target is empty" ; else pushd target ; cp -r * /tmp/generated/ ; popd ; fi fi
@@ -456,8 +458,8 @@ jobs:
             if [ -d translation ] ; then if [ ! "$(ls -A translation)" ] ; then echo "directory translation is empty" ; else cp -rT translation /tmp/generated/report/ ; fi fi
             if [ -d examples ] ; then if [ ! "$(ls -A examples)" ] ; then echo "directory examples is empty" ; else cp -rT examples /tmp/generated/examples/ ; fi fi
       - run:
-          name: check if all publication points are generated 
-          workdir: /tmp/generated
+          name: check if all publication points are generated
+          working_directory: /tmp/generated
           command: |
             ls -al *
             if [ -d report ] ; then ls -al report/* || ls -al report ; fi
@@ -465,21 +467,21 @@ jobs:
       - run:
           name: check the existence of all publication points
           command: |
-             $PWD/scripts/validate_publicationpoints.sh $PWD/config /tmp/generated false
-             #$PWD/scripts/validate_publicationpoints.sh $PWD/config /tmp/generated true # enable this line to make the test blocking
+            $PWD/scripts/validate_publicationpoints.sh $PWD/config /tmp/generated false
+            #$PWD/scripts/validate_publicationpoints.sh $PWD/config /tmp/generated true # enable this line to make the test blocking
       - run:
           name: check the support of paths by a publication points
           command: |
-             $PWD/scripts/remove_obsolete_publicationpoints.sh $PWD/config /tmp/generated false
+            $PWD/scripts/remove_obsolete_publicationpoints.sh $PWD/config /tmp/generated false
       - run:
           name: insert the commit
-          workdir: /tmp/generated
+          working_directory: /tmp/generated
           command: |
             export TAG=`echo "${CIRCLE_SHA1}" | cut -c1-15`
             echo "{\"commit\" : \"$TAG\"}" > report/commit.json
       - run:
           name: Push results to github
-          workdir: /tmp/generated
+          working_directory: /tmp/generated
           command: |
             # expand the tilde first
             export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
@@ -553,6 +555,6 @@ workflows:
             - render-context-details
             - render-voc-rdf
       - create-artifact:
-          generatedReporFingerprint: "$$SSHKEYFINGERPRINT"
+          generatedRepoFingerprint: "$$SSHKEYFINGERPRINT"
           requires:
             - expand-links
