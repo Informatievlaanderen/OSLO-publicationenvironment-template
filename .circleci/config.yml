@@ -39,37 +39,6 @@ jobs:
             - links.txt
             - src/
             - raw-input/
-  extract-jsonld-details:
-    docker:
-      - image: informatievlaanderen/oslo-ea-to-rdf:json-ld-format-m1.1.3
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Extract json details from UML diagram(s)
-          command: $PWD/scripts/extract-what.sh jsonld
-      - run:
-          name: Show the report (for debugging purposes)
-          command: |
-            if [ -d /tmp/workspace/report ] ; then cat /tmp/workspace/report/*.report ; fi
-      - run:
-          name: List the files which have been created
-          command: |
-            if [ -d /tmp/workspace/report ] ; then ls -al /tmp/workspace/report/* ; fi
-      - run:
-          name: Show the errors found (for debugging purposes)
-          command:
-            egrep " ERROR " /tmp/workspace/report/*.report || true
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - checkouts.txt
-            - links.txt
-            - report/
-            - tsv/
-            - json/
-            - src/
   extract-jsonld-details-4:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
@@ -81,7 +50,7 @@ jobs:
           name: touch a file
           command: |
             mkdir -p /tmp/workspace/report4
-            touch /tmp/workspace/report4/.ignore04
+            touch /tmp/workspace/report4/.ignore
       - run:
           name: install software
           command: sudo npm install --global @oslo-flanders/ea-converter
@@ -115,122 +84,58 @@ jobs:
           root: /tmp/workspace
           paths:
             - report4/
-  validate-report:
+  render-translation-4:
     docker:
-      - image: informatievlaanderen/oslo-ea-to-rdf:json-ld-format-m1.1.3
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
+    parameters:
+      generatedRepoFingerprint:
+        type: string
     steps:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run:
-          name: Check no errors found in the reports
-          command:
-            egrep " ERROR " /tmp/workspace/report/*.report || true ;
-            [ $( egrep " ERROR " /tmp/workspace/report/*.report | wc -l ) == 0 ] || exit 1
-  normalise-jsonld:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Normalise the recovered JSON-LD files (in the src directory)
-          command: |
-            $PWD/scripts/pretty-print-jsonfiles.sh /tmp/workspace
-            mkdir -p /tmp/workspace/report /tmp/workspace/json /tmp/workspace/json
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - report/
-            - json/
-            - src/
-  render-translation-json:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: upgrade configs to this toolchain
+          name: touch a file
           command: |
             mkdir -p /tmp/workspace/translation
-            $PWD/scripts/upgrade_config.sh /tmp/workspace $PWD/config
+            touch /tmp/workspace/translation/.ignore
+      - add_ssh_keys:
+          fingerprints:
+            - << parameters.generatedRepoFingerprint >>
+      - run:
+          name: download translation memory
+          working_directory: /tmp/workspace
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            GENERATEDREPO=$(jq --arg bt "${CIRCLE_BRANCH}" -r '.generatedrepository + {"filepath":"autotranslation.tgz", "branchtag":"\($bt)"}' ${CIRCLEWKD}/config/config.json)
+            if  ${CIRCLEWKD}/scripts/downloadFileGithub.sh "${GENERATEDREPO}" autotranslation.tgz ${TOOLCHAIN_TOKEN} ; then tar -xzf autotranslation.tgz ; fi
+      - run:
+          name: Render metadata JSON from jsonld
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace metadata ${CIRCLEWKD}/config
       - run:
           name: Render translation JSON from jsonld
           command: |
             mkdir -p /tmp/workspace/translation
-            $PWD/scripts/render-details.sh /tmp/workspace multilingual $PWD/config
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace translation ${CIRCLEWKD}/config
       - run:
-          name: touch a file
+          name: Autotranslate the translation files
           command: |
-            touch /tmp/workspace/translation/.ignore04
+            mkdir -p /tmp/workspace/translation
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace autotranslate ${CIRCLEWKD}/config
+      - run:
+          name: merge translations with the prime representation
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace merge ${CIRCLEWKD}/config
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - translation/
-            - src/
-  validate-and-generate-translation-report:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: generate the reports
-          command: |
-            $PWD/scripts/render-details.sh /tmp/workspace report $PWD/config
-      - run:
-          name: Check no warnings found in the reports
-          command:
-            egrep " WARNING " /tmp/workspace/report/translation/*.report || true ;
-            [ $( egrep " WARNING " /tmp/workspace/report/translation/*.report | wc -l ) == 0 ] || exit 1
-  render-merged-jsonld:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Render merged JSONLD from jsonld and translationjson
-          command: |
-            mkdir -p  /tmp/workspace/report
-            $PWD/scripts/render-details.sh /tmp/workspace merge $PWD/config
-      - run:
-          name: touch a file
-          command: |
-            touch /tmp/workspace/report/.ignore05
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - report/
-  render-html-details:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Render HTML version of merged json file (a)
-          command: |
-            mkdir -p /tmp/workspace/target /tmp/workspace/reporthtml
-            $PWD/scripts/render-details.sh /tmp/workspace html $PWD/config
-      - run:
-          name: copy the site-skeleton for the html
-          command: $PWD/scripts/copy_skeleton.sh
-      - run:
-          name: List the html files found
-          command: |
-            if [ -d /tmp/workspace/target ] ; then find /tmp/workspace/target -name \*.html -type f ; fi
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - target/
-            - reporthtml/
+            - report4/
+            - autotranslation
   render-html-details-4:
     docker:
       - image: cimg/node:20.15.0
@@ -241,8 +146,8 @@ jobs:
       - run:
           name: touch a file
           command: |
-            mkdir -p /tmp/workspace/report4
-            touch /tmp/workspace/report4/.ignore04
+            mkdir -p /tmp/workspace/report4/html/
+            touch /tmp/workspace/report4/html/.ignore
       - run:
           name: install software
           command: |
@@ -276,8 +181,8 @@ jobs:
       - run:
           name: touch a file
           command: |
-            mkdir -p /tmp/workspace/report4
-            touch /tmp/workspace/report4/.ignore04
+            mkdir -p /tmp/workspace/report4/respec
+            touch /tmp/workspace/report4/respec/.ignore
       - run:
           name: install software
           command: sudo npm install --global @oslo-flanders/html-respec-generator
@@ -299,76 +204,6 @@ jobs:
           paths:
             - report4/respec/
             - target/
-#      - run:
-#          name: update and add extra statements of updating the ssh config for each private ssh key
-#          command: |
-#            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-#            export TRANSLATIONREPO=$(jq -r .translationrepository.repository ${CIRCLEWKD}/config/config.json)
-#            ${CIRCLEWKD}/scripts/update_sshconfig.sh ${TRANSLATIONREPO}
-#      - run:
-#          name: Checkout translation repo | XXX this repo could be replaced with a tar.gz file in the generated repo. Probably translationfiles are very good compressable. But we loose diffs.
-#          command: |
-#            rm -rf /tmp/workspace/autotranslation
-#            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-#            export REPO=$(jq -r .translationrepository ${CIRCLEWKD}/config/config.json)
-#            ${CIRCLEWKD}/scripts/checkoutRepoGithub.sh "${REPO}" /tmp/workspace/autotranslation ${TOOLCHAIN_TOKEN}
-#      - run:
-#          name: clean the generated directory
-#          working_directory: /tmp/workspace/autotranslation
-#          command: |
-#            git fetch origin
-#            git checkout -b "${CIRCLE_BRANCH}" --track "origin/${CIRCLE_BRANCH}" || git checkout "${CIRCLE_BRANCH}"
-  render-translation-4:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
-    parameters:
-      generatedRepoFingerprint:
-        type: string
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - add_ssh_keys:
-          fingerprints:
-            - << parameters.generatedRepoFingerprint >>
-      - run:
-          name: download translation memory
-          working_directory: /tmp/workspace
-          command: |
-            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            GENERATEDREPO=$(jq --arg bt "${CIRCLE_BRANCH}" -r '.generatedrepository + {"filepath":"autotranslation.tgz", "branchtag":"\($bt)"}' ${CIRCLEWKD}/config/config.json)
-            if  ${CIRCLEWKD}/scripts/downloadFileGithub.sh "${GENERATEDREPO}" autotranslation.tgz ${TOOLCHAIN_TOKEN} ; then tar -xzf autotranslation.tgz ; fi
-      - run:
-          name: Render metadata JSON from jsonld
-          command: |
-            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace metadata ${CIRCLEWKD}/config
-      - run:
-          name: Render translation JSON from jsonld
-          command: |
-            mkdir -p /tmp/workspace/translation
-            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace translation ${CIRCLEWKD}/config
-      - run:
-          name: Autotranslate the translation files
-          command: |
-            mkdir -p /tmp/workspace/translation
-            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace autotranslate ${CIRCLEWKD}/config
-      - run:
-          name: merge translations with the prime representation
-          command: |
-            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
-            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace merge ${CIRCLEWKD}/config
-      - run:
-          name: touch a file
-          command: |
-            touch /tmp/workspace/translation/.ignore04
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - report4/
-            - autotranslation
   render-rdf-details-4:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
@@ -379,8 +214,8 @@ jobs:
       - run:
           name: touch a file
           command: |
-            mkdir -p /tmp/workspace/report4
-            touch /tmp/workspace/report4/.ignore04
+            mkdir -p /tmp/workspace/report4/rdf
+            touch /tmp/workspace/report4/rdf/.ignore
       - run:
           name: install software
           command: sudo npm install --global @oslo-flanders/rdf-vocabulary-generator
@@ -408,8 +243,8 @@ jobs:
       - run:
           name: touch a file
           command: |
-            mkdir -p /tmp/workspace/report4
-            touch /tmp/workspace/report4/.ignore05
+            mkdir -p /tmp/workspace/report4/shacl
+            touch /tmp/workspace/report4/shacl/.ignore
       - run:
           name: install software
           command: sudo npm install --global @oslo-flanders/shacl-template-generator
@@ -438,8 +273,8 @@ jobs:
       - run:
           name: touch a file
           command: |
-            mkdir -p /tmp/workspace/report4
-            touch /tmp/workspace/report4/.ignore05
+            mkdir -p /tmp/workspace/report4/context
+            touch /tmp/workspace/report4/context/.ignore
       - run:
           name: install software
           command: sudo npm install --global @oslo-flanders/jsonld-context-generator
@@ -465,38 +300,20 @@ jobs:
       - attach_workspace:
           at: /tmp/workspace
       - run:
+          name: touch a file
+          command: |
+            mkdir -p /tmp/workspace/report4/examples
+            touch /tmp/workspace/report4/examples/.ignore
+      - run:
           name: Render example templates
           command: |
             mkdir -p /tmp/workspace/examples
             $PWD/scripts/render-details.sh /tmp/workspace example $PWD/config
-      - run:
-          name: touch a file
-          command: |
-            touch /tmp/workspace/examples/.ignore06
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - examples/
-  render-context-details:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Render Context Details
-          command: |
-            $PWD/scripts/render-details.sh /tmp/workspace context $PWD/config
-            mkdir -p /tmp/workspace/target
-      - run:
-          name: List the context files found
-          command: |
-            if [ -d /tmp/workspace/target ] ; then find /tmp/workspace/target -name \*.jsonld -type f ; fi
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - target/
+            - target
+            - report4/examples
   render-xsd-details:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
@@ -504,6 +321,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
+      - run:
+          name: touch a file
+          command: |
+            mkdir -p /tmp/workspace/report4/xsd
+            touch /tmp/workspace/report4/xsd/.ignore
       - run:
           name: Render XSD Details
           command: |
@@ -516,32 +338,8 @@ jobs:
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - target/
-  render-shacl-details:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Render Shacl details
-          command: |
-            mkdir -p /tmp/workspace/target /tmp/workspace/report
-            $PWD/scripts/render-details.sh /tmp/workspace shacl $PWD/config
-      - run:
-          name: touch a file
-          command: |
-            touch /tmp/workspace/target/.ignore08
-            touch /tmp/workspace/report/.ignore09
-      - run:
-          name: List the shacl files found
-          command: find /tmp/workspace/target -name \*-SHACL.jsonld -type f
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - target/
-            - report/
+            - target
+            - report4/xsd
   convert-json-to-ttl:
     docker:
       - image: cimg/ruby:3.0.2
@@ -585,6 +383,7 @@ jobs:
             $PWD/scripts/expand-links.sh /tmp/workspace $PWD/config
       - run:
           name: Consolidate reporting
+          no_output_timeout: 45m
           command: |
             echo "consolidate reporting /tmp/workspace/report4"
             RLINE=/tmp/workspace/report4
@@ -629,6 +428,7 @@ jobs:
             if  ${CIRCLEWKD}/scripts/downloadFileGithub.sh "${GENERATEDREPO}" README.md ${TOOLCHAIN_TOKEN} ; then echo "global report downloaded" ; fi
       - run:
           name: create overview report
+          no_output_timeout: 45m
           command: |
             export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
             ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace report ${CIRCLEWKD}/config
@@ -637,66 +437,6 @@ jobs:
           paths:
             - target/
             - report4/
-  render-voc-jsonld:
-    docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Install dependencies
-          command: |
-            mkdir -p /tmp/workspace/voc
-      - run:
-          name: touch a file
-          command: |
-            touch /tmp/workspace/voc/.ignore11
-      - run:
-          name: Generate vocabulary in baseformat jsonld
-          command: |
-            mkdir -p /tmp/workspace/target/doc/vocabularium
-            $PWD/scripts/generate-voc.sh /tmp/workspace json $PWD/config
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - target/
-  render-voc-rdf:
-    docker:
-      - image: cimg/ruby:3.0.2
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Install dependencies
-          command: |
-            gem install linkeddata
-            mkdir -p /tmp/workspace/target/doc/vocabularium
-      - run:
-          name: touch a file
-          command: |
-            touch /tmp/workspace/target/.ignore12
-      - run:
-          name: Convert vocabulary to turtle
-          command: |
-            find /tmp/workspace/target/doc/vocabularium -name \*.jsonld -type f | $PWD/scripts/convert_to_any.sh turtle
-      - run:
-          name: Convert vocabulary to ntriples
-          command: |
-            find /tmp/workspace/target/doc/vocabularium -name \*.jsonld -type f | $PWD/scripts/convert_to_any.sh ntriples
-      - run:
-          name: Convert vocabulary to rdf/xml
-          command: |
-            find /tmp/workspace/target/doc/vocabularium -name \*.jsonld -type f | $PWD/scripts/convert_to_any.sh rdfxml
-      - run:
-          name: list results
-          command: |
-            if [ -d /tmp/workspace/voc ]; then ls /tmp/workspace/voc ; fi
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - target/
   copy-raw:
     docker:
       - image: cimg/node:20.15.0
@@ -808,7 +548,12 @@ jobs:
       - run:
           name: make summary 
           command: |
+            rm -rf /tmp/generated/report4/publicationpoint.report.md
             $PWD/scripts/render_publicationpointsstatus.sh /tmp/generated/report4/publicationpoint.report.md
+            cp /tmp/generated/report4/publicationpoint.report.md /tmp/final.md
+            echo " " >> /tmp/final.md
+            cat /tmp/generated/report4/README.md >> /tmp/final.md
+            cp /tmp/final.md /tmp/generated/report4/README.md
       - run:
           name: insert the commit
           working_directory: /tmp/generated
@@ -837,29 +582,11 @@ workflows:
   generate_documentation:
     jobs:
       - checkout
-      # - extract-jsonld-details:
-      #     requires:
-      #       - checkout
       - extract-jsonld-details-4:
           requires:
             - checkout
-      # - normalise-jsonld:
-      #     requires:
-      #       - extract-jsonld-details
-      # - validate-report:
-      #     requires:
-      #       - extract-jsonld-details
-      # - render-merged-jsonld:
-      #     requires:
-      #       - render-translation-json
-      # - render-example-templates:
-      #     requires:
-      #       - render-merged-jsonld
-      # - render-html-details:
-      #     requires:
-      #       - render-merged-jsonld
       - render-translation-4:
-          generatedRepoFingerprint: "5a:2a:cd:77:20:ea:62:ca:a3:83:f7:6c:fd:f4:e3:f0"
+          generatedRepoFingerprint: "$$SSHKEYFINGERPRINT"
           requires:
             - extract-jsonld-details-4
       - render-rdf-details-4:
@@ -877,30 +604,15 @@ workflows:
       - render-shacl-details-4:
           requires:
             - render-translation-4
-      # - render-voc-jsonld:
-      #     requires:
-      #       - render-merged-jsonld
-      # - render-voc-rdf:
-      #     requires:
-      #       - render-voc-jsonld
-      # - render-shacl-details:
-      #     requires:
-      #       - render-merged-jsonld
       - convert-json-to-ttl:
           requires:
             - render-shacl-details-4
-      # - render-context-details:
+      # - render-example-templates:
       #     requires:
       #       - render-merged-jsonld
-      #      - render-xsd-details:
+      # - render-xsd-details:
       #          requires:
       #            - render-merged-jsonld
-      # - render-translation-json:
-      #     requires:
-      #       - normalise-jsonld
-      # - validate-and-generate-translation-report:
-      #     requires:
-      #       - render-translation-json
       - copy-raw:
           requires:
             - checkout
@@ -912,12 +624,8 @@ workflows:
             - render-html-details-4
             - render-respec-html-details-4
             # - render-example-templates
-            # - convert-json-to-ttl
-            # - render-html-details
             - copy-raw
-            # - render-context-details
-            # - render-voc-rdf
       - create-artifact:
-          generatedRepoFingerprint: "5a:2a:cd:77:20:ea:62:ca:a3:83:f7:6c:fd:f4:e3:f0"
+          generatedRepoFingerprint: "$$SSHKEYFINGERPRINT"
           requires:
             - expand-links

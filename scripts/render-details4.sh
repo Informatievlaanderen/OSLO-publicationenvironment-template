@@ -591,6 +591,13 @@ render_rdf() { # SLINE TLINE JSON
             cat ${REPORTFILE}
             execution_strickness
         fi
+	if [ -f ${OUTPUT} ] ; then
+		echo "RENDER-DETAILs: success"
+	else
+            echo "RENDER-DETAILS: failed"
+            cat ${REPORTFILE}
+            execution_strickness
+        fi
 
         if [ ${PRIMELANGUAGE} == true ]; then
             cp ${OUTPUT} ${OUTPUTDIR}/${VOCNAME}.ttl
@@ -714,6 +721,13 @@ render_nunjunks_html() { # SLINE TLINE JSON
         cat ${REPORTFILE}
         execution_strickness
     fi
+	if [ -f ${OUTPUT} ] ; then
+		echo "RENDER-DETAILs: success"
+	else
+            echo "RENDER-DETAILS: failed"
+            cat ${REPORTFILE}
+            execution_strickness
+        fi
 
     if [ ${PRIMELANGUAGE} == true ]; then
         cp ${OUTPUT} ${TLINE}/index.html
@@ -904,6 +918,7 @@ render_context() { # SLINE TLINE JSON
 
     COMMAND=$(echo '.type')
     TYPE=$(jq -r "${COMMAND}" ${JSONI})
+    OUTPUT=${TLINE}/context/${OUTFILELANGUAGE} 
 
     generator_parameters contextgenerator ${JSONI}
 
@@ -915,10 +930,17 @@ render_context() { # SLINE TLINE JSON
         oslo-jsonld-context-generator ${PARAMETERS} \
             --input ${MERGEDFILE} \
             --language ${GOALLANGUAGE} \
-            --output ${TLINE}/context/${OUTFILELANGUAGE} \
+            --output ${OUTPUT} \
             &>>${REPORTFILE}
 
         if [ $? -gt 0 ]; then
+            echo "RENDER-DETAILS: failed"
+            cat ${REPORTFILE}
+            execution_strickness
+        fi
+	if [ -f ${OUTPUT} ] ; then
+		echo "RENDER-DETAILs: success"
+	else
             echo "RENDER-DETAILS: failed"
             cat ${REPORTFILE}
             execution_strickness
@@ -984,6 +1006,13 @@ render_shacl_languageaware() {
             &>>${REPORTFILE}
 
         if [ $? -gt 0 ]; then
+            echo "RENDER-DETAILS: failed"
+            cat ${REPORTFILE}
+            execution_strickness
+        fi
+	if [ -f ${OUTFILE} ] ; then
+		echo "RENDER-DETAILs: success"
+	else
             echo "RENDER-DETAILS: failed"
             cat ${REPORTFILE}
             execution_strickness

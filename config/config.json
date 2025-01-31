@@ -1,9 +1,15 @@
 {
   "primeLanguage": "nl",
-  "otherLanguages": ["en", "fr", "de"],
+  "otherLanguages": [
+    "en",
+    "fr",
+    "de"
+  ],
   "hostname": "https://dev.specs.org/",
   "domain": "data.spec.org",
-  "publicationpoints": ["dev"],
+  "publicationpoints": [
+    "dev"
+  ],
   "generatedrepository": {
     "organisation": "GitHubOrganisation",
     "repository": "GeneratedRepository",
@@ -11,14 +17,7 @@
     "gitEmail": "toolchain@dev.specs.org",
     "gitUser": "toolchain"
   },
-  "translationrepository": {
-    "organisation": "GitHubOrganisation",
-    "repository": "GeneratedRepository",
-    "private": false,
-    "gitEmail": "toolchain@dev.specs.org",
-    "gitUser": "toolchain"
-  },
-  "toolchainversion": "4.0.0",
+  "toolchainversion": "4.0.1",
   "toolchain": {
     "strickness": "lazy",
     "version": 4,

@@ -63,6 +63,8 @@ extract_json() {
     local DIAGRAM=$( jq -r .[].diagram ${MAPPINGFILE} )
     local UMLFILE=$( jq -r .[].eap ${MAPPINGFILE} )
     local SPECTYPE=$( jq -r .[].type ${MAPPINGFILE} )
+    COMMAND='.[]."publication-state"'
+    local STATUS=$( jq -r ""${COMMAND}"" ${MAPPINGFILE} )
     local URLREF=$( jq -r .urlref .publication-point.json )
     local HOSTNAME=$( jq -r .hostname  ${CONFIGDIR}/config.json )
     local DOMAIN=$( jq -r .domain  ${CONFIGDIR}/config.json )
@@ -94,21 +96,30 @@ extract_json() {
     echo "${REPORTLINEPREFIX}-------------------------------------" &>>${REPORTFILE}
     oslo-converter-ea --umlFile ${UMLFILE} --diagramName ${DIAGRAM} --outputFile ${OUTPUTFILE} \
                  --specificationType ${SPECTYPE} --versionId ${URLREF2} --baseUri https://${DOMAIN} \
+		 --debug true \
                  --publicationEnvironment ${HOSTNAME2}/ \
-                 &> ${REPORTFILE}
+                 &>> ${REPORTFILE}
 
         if [ $? -gt 0 ] ; then
             echo "UML extraction failed"
             execution_strickness
         fi
+	
+    # perform postprocessing 
+    echo "${REPORTLINEPREFIX}-------------------------------------" &>>${REPORTFILE}
+    ${CIRCLEWKD}/scripts/postprocess_intermediate.sh ${STATUS} ${DOMAIN} ${OUTPUTFILE} &>>${REPORTFILE}
 
     # XXX use one export for reporting one for processing
 
+    # Extract values from JSON
+    CONTRIBUTORSCOLUMN=$(jq -r '.[]."contributors-column"' "${MAPPINGFILE}")
+    CONTRIBUTORSFILE=$(jq -r '.[]."contributors-file"' "${MAPPINGFILE}")
+
     SK_REPORTFILE=${TTDIR}/oslo-stakeholders-converter.report.md
-    echo "${REPORTLINEPREFIX}oslo-stakeholders-converter" &>>${SK_REPORTFILE}
+    echo "${REPORTLINEPREFIX} oslo-stakeholders-converter" &>>${SK_REPORTFILE}
     echo "${REPORTLINEPREFIX}-------------------------------------" &>>${SK_REPORTFILE}
-    oslo-stakeholders-converter --input stakeholders.csv --outputFormat application/json --output ${TTDIR}/stakeholders.json &>>${SK_REPORTFILE}
-    oslo-stakeholders-converter --input stakeholders.csv --outputFormat application/json --output stakeholders.json
+    oslo-stakeholders-converter --input ${CONTRIBUTORSFILE} --outputFormat application/json --contributorsColumn ${CONTRIBUTORSCOLUMN} --output ${TTDIR}/stakeholders.json &>>${SK_REPORTFILE}
+    oslo-stakeholders-converter --input ${CONTRIBUTORSFILE} --outputFormat application/json --contributorsColumn ${CONTRIBUTORSCOLUMN} --output stakeholders.json
 
 #   exit code of java program is not reliable for detecting processing error
 #    if  [ $? -eq 0 ] ; then
@@ -180,4 +191,3 @@ do
       echo "Error: ${SLINE}" >> log.txt
     fi
 done
-

@@ -74,3 +74,17 @@
   * https://www.npmjs.com/package/@oslo-flanders/html-respec-generator
   * https://www.npmjs.com/package/@oslo-flanders/html-generator
   * https://www.npmjs.com/package/@oslo-flanders/examples-generator
+Version 4.0.0 is conceptually the same as version 3.x.y. but because it reimplements the
+core tools: the UML extractor and the artefact generators, the change is a major update.
+From a user perspective, the same publicationpoints and config are being supported.
+But the whole CI/CD flow has been adapted in a distructive manner.
+Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
+
+# version 4.0.1
+- improvements in the CI/CD
+- adding monitoring setup
+- include more strictness checks
+- adding statistics + configuration instructions 
+- add supporting tools
+- replace the specific configuration values in the CI/CD with generic templates
+

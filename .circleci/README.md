@@ -86,10 +86,15 @@ The objective of each job is shortly described in this section.
 The jobs rely on public docker images which are either published by CircleCI or build on top of these with specific software installed.
 The two main are 
 
-  - informatievlaanderen/oslo-ea-to-rdf:json-ld-format-m1.1.1
-  - informatievlaanderen/oslo-specification-generator:multilingual-dev-0.3
+  - cimg/node:20.15.0
+  - informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
+
+As the tools are also published on NPM, the creation of a specific dedicated version has been replaced with a installation in each step.
+In the future both images might be integrated together into one as they share the same base image.
 
 
-The first image contains the Enterprise Architect Conversion Tool, a tool that extracts from the UML model the core semantic data. 
-The second image contains all artifact generation tools.
 
+In Release 3 a specific docker image was build for the UML extraction tool. 
+The latest version of that (old) image is informatievlaanderen/oslo-ea-to-rdf:json-ld-format-m1.1.1 .
+This image contains the Enterprise Architect Conversion Tool, a tool that extracts from the UML model the core semantic data. 
+The second image ( oslo-specification-generator ) contains all artifact generation tools.

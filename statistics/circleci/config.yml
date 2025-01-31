@@ -40,6 +40,8 @@ jobs:
     parameters:
       repository:
         type: string
+      statisticsRepoFingerprint:
+        type: string
     docker:
       - image: cimg/node:20.15.0
     steps:
@@ -48,7 +50,7 @@ jobs:
           at: /tmp/workspace
       - add_ssh_keys:
           fingerprints:
-            - "SHA256:0CS5iA9PxgCLEApmaNBHAQEXFnNmOu5W6UePx2o5uH4"
+            - << parameters.statisticsRepoFingerprint >>
       - run:
           name: Checkout target repo
           workdir: /tmp
@@ -92,6 +94,7 @@ workflows:
     jobs:
       - build-stats
       - create-artifact:
-          repository: git@github.com:Informatievlaanderen/data.vlaanderen.be-statistics.git
+          repository:  $$STATISTICSREPO
+          statisticsRepoFingerprint: $$STATISTICSREPOFINGERPRINT
           requires:
             - build-stats
