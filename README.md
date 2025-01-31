@@ -1,8 +1,26 @@
 # OSLO-publicationenvironment-template
 This is a template for the OSLO publication environment.
 
+# release 4 
+Version 3 has been replaced with version 4. The latest version of 3 is 3.1.3.
+As version 3 is depending on not maintained software, i.e. the maintenance has been shifted to new core software corresponding version 4,
+users relying on toolchain 4 are requested to upgrade their setup.
+
+Release 4 is therefore a breaking change from the software perspective. From the data specification editor perspective 
+this release has no impact on the way of working.
+The underlying software is, though, more strict and therefore existing data specifications that are processable by version 3
+might require an update. In most cases these are editorial mistakes, or issues resulting from the editorial process in the UML editor.
+Editors should consult https://github.com/Informatievlaanderen/OSLO-UML-Transformer/wiki for common issues and how 
+to resolve them.
+
+Release 4 also comes with an improved monitoring and statistcs. This allows to followup more precisely the quality of the data standards.
+
+
+
+
 The version of this template is found in [config/config.json](./config/config.json).
 
+# The OSLO toolchain architecture
 
 ![overview](overview.jpg)
 
