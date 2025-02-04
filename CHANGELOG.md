@@ -74,6 +74,7 @@
   * https://www.npmjs.com/package/@oslo-flanders/html-respec-generator
   * https://www.npmjs.com/package/@oslo-flanders/html-generator
   * https://www.npmjs.com/package/@oslo-flanders/examples-generator
+
 Version 4.0.0 is conceptually the same as version 3.x.y. but because it reimplements the
 core tools: the UML extractor and the artefact generators, the change is a major update.
 From a user perspective, the same publicationpoints and config are being supported.
