@@ -1,6 +1,9 @@
 # OSLO-publicationenvironment-template
 This is a template for the OSLO publication environment.
 
+*IMPORTANT* This is the last version of release 3. Users of the OSLO toolchain are requested to switch their 
+implementation to version 4. 
+
 The version of this template is found in [config/config.json](./config/config.json).
 
 
