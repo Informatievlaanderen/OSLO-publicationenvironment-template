@@ -6,15 +6,27 @@
 extractwhat=$1
 TARGETDIR=/tmp/workspace
 CHECKOUTFILE=${TARGETDIR}/checkouts.txt
+CONFIGDIR_DEFAULT=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+CONFIGDIR=${2:-$CONFIGDIR_DEFAULT/config}
 
-# TODO: Docker container should include java in path
-PATH=$PATH:/usr/local/openjdk-8/bin
 
+REPORTLINEPREFIX='#||# '
+
+STRICT=$(jq -r .toolchain.strickness ${CONFIGDIR}/config.json)
+execution_strickness() {
+    if [ "${STRICT}" != "lazy" ]; then
+        exit -1
+    fi
+}
 
 #############################################################################################
 # extraction command functions
 
 get_mapping_file() {
+    if [ -f ".names.json" ] ; then
+	    # mapping file is already extracted
+	MAPPINGFILE=".names.json"
+    else 
     local MAPPINGFILE=`jq -r 'if (.filename | length) > 0 then .filename else @sh "config/eap-mapping.json"  end' .publication-point.json`
     #local MAPPINGFILE="config/eap-mapping.json"
     if [ -f ".names.txt" ]
@@ -23,55 +35,11 @@ get_mapping_file() {
 	jq "${STR}" ${MAPPINGFILE} > .names.json
 	MAPPINGFILE=".names.json"
     fi
+    fi
     echo ${MAPPINGFILE}
 }
 
-#############################################################################################
-extract_tsv() {
-    local MAPPINGFILE=$1
-    local LINE=$2
-    local TDIR=${TARGETDIR}/report/${LINE}/tsv
-    mkdir -p ${TDIR} ${TARGETDIR}/tsv
-    
-    # Extract tsv data for each diagram    
-    #jq -r '.[] | select(.type | contains("ap")) | @sh "java -jar /app/ea-2-rdf.jar tsv -i \(.eap) -c config/config-ap.json -d \(.diagram) -o /tmp/workspace/tsv/\(if .prefix then .prefix + "/" else "" end)\(.name).tsv"' < $MAPPINGFILE | bash -e
-    jq -r '.[] | @sh "java -Xmx2g -jar /app/ea-2-rdf.jar tsv -i \(.eap) -c \(.config) -d \(.diagram) -o /tmp/workspace/tsv/\(if .prefix then .prefix + "/" else "" end)\(.name).tsv"' < $MAPPINGFILE | bash -e
 
-#    if [ ! -f "$(cat .names.txt).tsv" ]
-#    then
-#	echo "extract_what(tsv): $(cat .names.txt).tsv was not created"
-#	exit -1;
-#    fi
-#    cp $(cat .names.txt).tsv ${TDIR}
-    mv /tmp/workspace/tsv/$(cat .names.txt).tsv ${TDIR}    
-}
-
-#############################################################################################
-extract_raw() {
-    local MAPPINGFILE=$1
-    local LINE=$2
-    local TDIR=${TARGETDIR}/report/${LINE}/raw
-    mkdir -p ${TDIR} ${TARGETDIR}/raw
-    
-    # Extract tsv data for each diagram    
-    #jq -r '.[] | select(.type | contains("ap")) | @sh "java -jar /app/ea-2-rdf.jar tsv -i \(.eap) -c config/config-ap.json -d \(.diagram) -o /tmp/workspace/tsv/\(if .prefix then .prefix + "/" else "" end)\(.name).tsv"' < $MAPPINGFILE | bash -e
-    jq -r '.[] | @sh "java -Xmx2g -jar /app/ea-2-rdf.jar list -i \(.eap) --full --format json > /tmp/workspace/raw/\(.name).raw"' < $MAPPINGFILE | bash -e
-
-#    if [ ! -f "$(cat .names.txt).tsv" ]
-#    then
-#	echo "extract_what(tsv): $(cat .names.txt).tsv was not created"
-#	exit -1;
-#    fi
-    cp /tmp/workspace/raw/$(cat .names.txt).raw ${TDIR}    
-}
-#############################################################################################
-extract_ttl() {
-    local MAPPINGFILE=$1
-    local TDIR=${TARGETDIR}/ttl
-    mkdir -p ${TDIR}
-    # Extract ttl data for each diagram
-    jq -r '.[] | select(.type | contains("voc")) | @sh "java -Xmx2g -jar /app/ea-2-rdf.jar convert -i \(.eap) -c config/config-voc.json -d \(.diagram) -o /tmp/workspace/ttl/\(if .prefix then .prefix + "/" else "" end)\(.name).ttl"' $MAPPINGFILE | bash -e
-}
 
 #############################################################################################
 extract_stakeholder() {
@@ -87,10 +55,60 @@ extract_json() {
     local MAPPINGFILE=$1
     local LINE=$2
     local TDIR=${TARGETDIR}/json
-    local RDIR=${TARGETDIR}/report
-    local TTDIR=${TARGETDIR}/report/${LINE}
+    local RDIR=${TARGETDIR}/report4
+    local TTDIR=${TARGETDIR}/report4/${LINE}
     mkdir -p ${TDIR} ${RDIR} ${TTDIR} ${TARGETDIR}/target/${LINE}
-    java -Xmx2g -jar /app/ea-2-rdf.jar jsonld -c ${MAPPINGFILE} -n $(cat .names.txt) &> ${TTDIR}/$(cat .names.txt).report
+
+    local OUTPUTFILE=$(cat .names.txt).jsonld
+    local DIAGRAM=$( jq -r .[].diagram ${MAPPINGFILE} )
+    local UMLFILE=$( jq -r .[].eap ${MAPPINGFILE} )
+    local SPECTYPE=$( jq -r .[].type ${MAPPINGFILE} )
+    local URLREF=$( jq -r .urlref .publication-point.json )
+    local HOSTNAME=$( jq -r .hostname  ${CONFIGDIR}/config.json )
+    local DOMAIN=$( jq -r .domain  ${CONFIGDIR}/config.json )
+#    local REPORTFILE=${TTDIR}/$(cat .names.txt).report
+    local REPORTFILE=${TTDIR}/oslo-converter-ea.report.md
+
+    touch ${REPORTFILE}
+    if [ -f branchtag.report.md ] ; then 
+	    cp branchtag.report.md ${TTDIR}/branchtag.report.md 
+    fi
+
+    case $SPECTYPE in
+	    ap) SPECTYPE="ApplicationProfile"
+		    ;;
+            voc) SPECTYPE="Vocabulary"
+		    ;;
+            oj) SPECTYPE="ApplicationProfile"
+		    ;;
+            *) echo "ERROR: ${SPECTYPE} not recognized"
+	       SPECTYPE="ApplicationProfile"	    
+    esac
+
+
+    HOSTNAME2=$(echo ${HOSTNAME} | sed -e "s|/$||g" )
+    URLREF2=$(echo ${URLREF} | sed -e "s|^/||g" )
+
+
+    echo "${REPORTLINEPREFIX}oslo-converter-ea for diagram ${DIAGRAM}" &>>${REPORTFILE}
+    echo "${REPORTLINEPREFIX}-------------------------------------" &>>${REPORTFILE}
+    oslo-converter-ea --umlFile ${UMLFILE} --diagramName ${DIAGRAM} --outputFile ${OUTPUTFILE} \
+                 --specificationType ${SPECTYPE} --versionId ${URLREF2} --baseUri https://${DOMAIN} \
+                 --publicationEnvironment ${HOSTNAME2}/ \
+                 &> ${REPORTFILE}
+
+        if [ $? -gt 0 ] ; then
+            echo "UML extraction failed"
+            execution_strickness
+        fi
+
+    # XXX use one export for reporting one for processing
+
+    SK_REPORTFILE=${TTDIR}/oslo-stakeholders-converter.report.md
+    echo "${REPORTLINEPREFIX}oslo-stakeholders-converter" &>>${SK_REPORTFILE}
+    echo "${REPORTLINEPREFIX}-------------------------------------" &>>${SK_REPORTFILE}
+    oslo-stakeholders-converter --input stakeholders.csv --outputFormat application/json --output ${TTDIR}/stakeholders.json &>>${SK_REPORTFILE}
+    oslo-stakeholders-converter --input stakeholders.csv --outputFormat application/json --output stakeholders.json
 
 #   exit code of java program is not reliable for detecting processing error
 #    if  [ $? -eq 0 ] ; then
@@ -101,28 +119,32 @@ extract_json() {
 #       cat ${TTDIR}/$(cat .names.txt).report
 #       exit -1 ;
 #    fi
-    if [ ! -f "$(cat .names.txt).jsonld" ]
+    if [ ! -f "${OUTPUTFILE}" ]
     then
-        echo "extract_json: $(cat .names.txt).jsonld was not created"
-        cat  ${TTDIR}/$(cat .names.txt).report
-        exit -1;
+        echo "extract_json: ${OUTPUTFILE} was not created"
+        cat  ${REPORTFILE}
+	echo "{}" > ${OUTPUTFILE}
+	execution_strickness
+        # exit -1;
     fi
-    jq . $(cat .names.txt).jsonld &> /dev/null
+    jq . ${OUTPUTFILE} &> /dev/null
     if [ ! $? -eq 0 ] || [ ! -s  $(cat .names.txt).jsonld ]; then
-        echo "extract_json: ERROR EA-to-RDF ended in an error"
-        cat ${TTDIR}/$(cat .names.txt).report
-            exit -1 ;
+        echo "extract_json: ERROR UML extractor ended in an error"
+        cat ${REPORTFILE}
+	execution_strickness
+        # exit -1 ;
     fi
 
     cat .publication-point.json
-    jq -s '.[0] + .[1][0] + .[2]' $(cat .names.txt).jsonld $MAPPINGFILE .publication-point.json > ${TTDIR}/all-$(cat .names.txt).jsonld ## the sum in jq overwrites the value for .contributors
-    cp $(cat .names.txt).jsonld ${TTDIR}
+    jq -s '.[0] + .[1][0] + .[2]' ${OUTPUTFILE} $MAPPINGFILE .publication-point.json > ${TTDIR}/all-$(cat .names.txt).jsonld ## the sum in jq overwrites the value for .contributors
+    cp ${OUTPUTFILE} ${TTDIR}
     ## overwrite the content with the aggregated version
     cp ${TTDIR}/all-$(cat .names.txt).jsonld  $(cat .names.txt).jsonld 
-    cp $(cat .names.txt).report ${RDIR}
-    ( echo $PWD ; cat ${TTDIR}/$(cat .names.txt).report ) >> ${RDIR}/ALL.report
+    ( echo "\n########################\n" ) >> ${RDIR}/ALL.report
+    ( echo $PWD ; cat ${REPORTFILE} ) >> ${RDIR}/ALL.report
 }
 
+#############################################################################################
 # do the conversions
 
 if [ ! -f "${CHECKOUTFILE}" ]
@@ -147,12 +169,6 @@ do
        jq 'def maybe(k): if has(k) then { (k) : .[k] } else { (k) : "config/config-\(.type).json" } end; .[0] |= . + maybe("config")' $MAPPINGFILE > /tmp/mapfile
        cp /tmp/mapfile $MAPPINGFILE
        case $extractwhat in
-     	         raw) extract_raw $MAPPINGFILE $line
-                      ;;
-     	         tsv) extract_tsv $MAPPINGFILE $line
-		      ;;
-                 ttl) extract_ttl $MAPPINGFILE 
-		      ;;
 	      jsonld) extract_json $MAPPINGFILE $line
 		      ;;
         stakeholders) extract_stakeholder $MAPPINGFILE

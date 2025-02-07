@@ -6,6 +6,7 @@ CHECKOUTFILE=${TARGETDIR}/checkouts.txt
 
 #
 # convert older toolchain version configs to this version
+#   from 2.X to 3.x: add translation blocks for primelanguage if not present
 #
 
 upgrade_config() {

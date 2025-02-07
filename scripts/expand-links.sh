@@ -38,7 +38,12 @@ cp_content_dir() {
 
 	SEEALSO=$(echo ${PUBLICATIONPOINT} | jq -r '.seealso'  )
 	if [ -d "${TARGET}${SEEALSO}/${FROM}" ] ; then
-		cp ${TARGET}${SEEALSO}/${FROM}/* ${TARGET}/${TO}
+		HASFILES=$( ls -1 ${TARGET}${SEEALSO}/${FROM} | wc -l )
+		if [ ${HASFILES} -ne 0 ] ; then
+		  cp ${TARGET}${SEEALSO}/${FROM}/* ${TARGET}/${TO}
+	        else
+		  echo "ERROR: expected subdirectory ${TARGET}${SEEALSO}/${FROM} is empty"
+		fi
 	else
 		echo "ERROR: expected subdirectory ${TARGET}${SEEALSO}/${FROM} does not exist"
 	fi		
