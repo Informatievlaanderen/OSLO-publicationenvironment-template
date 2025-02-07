@@ -30,7 +30,11 @@ These values should be conform with the values in `/config/config.json`.
 |---|---|---|
 | `$$SSHKEYFINGERPRINT`     | - | The ssh key fingerprints. See deployment instructions at [README.md](../config/README.md) |
 
+## Multilingual API activation
+The toolchain 4.0 exploits the Azure translation API. 
+Other translation services could be supported but then the underlying software must be adapted.  
 
+TODO: explain the CIRCLECI KEYS to be set
 
 
 # Tips & Tricks
