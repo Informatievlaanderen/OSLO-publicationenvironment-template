@@ -263,3 +263,27 @@ This setup also supports toolchain maintainers when propagating changes to layou
 The setup of the toolchain is designed to consume minimal amount of operational costs. As all activity is done through source version control, the maintainers of the toolchain the publication environment obtain a very resiliant system. The sole single point of failure is the source control system, in this case github. The generated repository is the history of the publication environment. Loosing access to this repository is not entirely critical as the complete state can be recreated from the publication repository. Similary loosing control of the publication environment is not critical as the generated repository contains the state of the publication environment the form of the result of the transformation process. 
 
 More critical is loosing access to the thema repositories, as these contain the UML documents wich form the basis for the specifications. However with the necessary effort a UML document corresponding to the generated specification can be created.
+
+
+# Translation
+The toolchain comes with autotranslation support for the specifications based on the [Azure translation API](https://learn.microsoft.com/en-us/azure/ai-services/translator/). 
+This API can be replaced with any other translation API is needed.
+
+The translation process is as follows, On triggering a publication for data specification A, the extracted information from the UML model is converted into a translation file.
+This translation file is merged with any present translation file from the thema repository. 
+It ensures that translations provided by the editors in the thema repository take precendence over any autotranslation.
+After the merge the updated translation file is autotranslated to cover any missing elements.
+The same processing happens for the template files with the same precedence order.
+The autotranslation step make use of a translation memory. 
+The outcome of the autotranslation is stored in the translation memory. 
+Before initiating translation requests to the translation API, the translation memory is consulted. 
+If there were no changes then the existing translations are taken into account.
+
+The process design ensures thus:
+1. Editors translations take always precedence over autotranslation.
+2. When no changes happen, no translation requests will be made (performance improvements and cost reduction)
+3. When changes are made, only the changed elements are translated (performance improvements and cost reduction)
+
+Outstanding challenges are:
+1. the translation memory becomes to larges for GitHub storage
+
