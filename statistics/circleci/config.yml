@@ -8,9 +8,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
-      - add_ssh_keys:
-          fingerprints:
-            - "9c:16:8f:4a:b7:2c:b4:c1:ec:b8:68:03:99:10:17:a8"
       - run:
           name: build the statistics per specifications
           command: |

@@ -91,3 +91,6 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 - Make the statistics csv processing more robust
 - include the latest templates 
 
+# version 4.0.2
+- circleci statitistics improvement
+
