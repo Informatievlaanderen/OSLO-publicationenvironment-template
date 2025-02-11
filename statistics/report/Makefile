@@ -208,10 +208,12 @@ aggr.stat: aggr.organisations aggr.class aggr.props aggr.extclass aggr.extprops 
 
 %.voc.csv: %.voc
 	jq '.[] |= {"spec": .spec, "label" : .label[0]."@value", "assignedURI": .assignedURI } ' $^ > /tmp/$@
-	jq -r '(map(keys) | add | unique) as $$cols | map(. as $$row | $$cols | map($$row[.])) as $$rows | $$cols, $$rows[] | @csv' /tmp/$@ > ${TARGETDIR}/$@
+	LLL=$$( jq 'length' /tmp/$@ ) ; echo $$LLL ; if [ $$LLL -lt 1 ] ; then echo "No values for $^" ; else \
+	jq -r '(map(keys) | add | unique) as $$cols | map(. as $$row | $$cols | map($$row[.])) as $$rows | $$cols, $$rows[] | @csv' /tmp/$@ > ${TARGETDIR}/$@ ; fi
 %.ap.csv: %.ap
 	jq '.[] |= {"spec": .spec, "label" : .label[0]."@value", "assignedURI": .assignedURI } ' $^ > /tmp/$@
-	jq -r '(map(keys) | add | unique) as $$cols | map(. as $$row | $$cols | map($$row[.])) as $$rows | $$cols, $$rows[] | @csv' /tmp/$@ > ${TARGETDIR}/$@
+	LLL=$$( jq 'length' /tmp/$@ ) ; echo $$LLL ; if [ $$LLL -lt 1 ] ; then echo "No values for $^" ; else \
+	jq -r '(map(keys) | add | unique) as $$cols | map(. as $$row | $$cols | map($$row[.])) as $$rows | $$cols, $$rows[] | @csv' /tmp/$@ > ${TARGETDIR}/$@ ; fi
 
 ROOTS=root.classes root.properties root.externalclasses root.externalproperties
 ROOTSVOC=$(patsubst %, %.voc,${ROOTS})

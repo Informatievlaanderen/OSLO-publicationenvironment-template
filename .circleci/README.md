@@ -30,7 +30,15 @@ These values should be conform with the values in `/config/config.json`.
 |---|---|---|
 | `$$SSHKEYFINGERPRINT`     | - | The ssh key fingerprints. See deployment instructions at [README.md](../config/README.md) |
 
+## Multilingual API activation
+The toolchain 4.0 exploits the [Azure translation API](https://learn.microsoft.com/en-us/azure/ai-services/translator/). 
+Other translation services could be supported but then the underlying software must be adapted.  
 
+To enable the Azure translation service an active key is needed. This key has to be enabled in CIRCLECI.
+
+1. Let RP the publication environment repository that is configured
+2. In the project settings for RP in circleci, open the environment variables tab
+3. enter the environment variable AZURETRANSLATIONKEY with the Azure translation API key
 
 
 # Tips & Tricks

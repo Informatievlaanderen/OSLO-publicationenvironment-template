@@ -22,7 +22,7 @@ This pattern is in accordance to the [Flemish Standard for Persistent Identifier
 This rules are in accordance with the [Belgian Government Standard for Persistent Identifiers]().
 Both standards implement the 10 rules for persistent identifiers by SEMIC.
 
-The webservice proxy, a component deployed in the [publication environment](/documentation/README.md). must ensure the required behavior (content negotation/dereferencing) expressed in those standards for the URIs following the above pattern. 
+The webservice proxy, a component deployed in the [publication environment](https://github.com/Informatievlaanderen/OSLO-publicationenvironment-template/tree/main/documentation). must ensure the required behavior (content negotation/dereferencing) expressed in those standards for the URIs following the above pattern. 
 
 In order to limit security breaches, but still offer editors  a quick way to add static content without requiring technical support, the following rules have been made:
    - 'cms' is an open space which will be served by the proxy as `https:{domain}/cms/`. Editors are welcome to contribute to this space with html pages and static content to share content on the publication environment.

@@ -2,7 +2,7 @@
 This is a template for the OSLO publication environment.
 
 # release 4 
-Version 3 has been replaced with version 4. The latest version of 3 is 3.1.3.
+Version 3 has been replaced with version 4. The latest version of 3 is [3.1.3](https://github.com/Informatievlaanderen/OSLO-publicationenvironment-template/tree/3.1.3).
 As version 3 is depending on not maintained software, i.e. the maintenance has been shifted to new core software corresponding version 4,
 users relying on toolchain 4 are requested to upgrade their setup.
 

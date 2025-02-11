@@ -451,11 +451,11 @@ autotranslatefiles() {
 
     if [ -f "${INPUTTRANSLATIONFILE}" ]; then
         echo "A translation file ${TRANSLATIONFILE} exists."
-        echo "UPDATE the translation file: node /app/autotranslate.js -i ${INPUTTRANSLATIONFILE} -s ${AZURETRANLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -o ${OUTPUTFILE} -p ${REPORTLINEPREFIX}"
+        echo "UPDATE the translation file: node /app/autotranslate.js -i ${INPUTTRANSLATIONFILE} -s ${AZURETRANSLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -o ${OUTPUTFILE} -p ${REPORTLINEPREFIX}"
         echo "${REPORTLINEPREFIX}" &>>${REPORTFILE}
         echo "${REPORTLINEPREFIX} autotranslate the translation file for language ${GOALLANGUAGE}" &>>${REPORTFILE}
         echo "${REPORTLINEPREFIX}" &>>${REPORTFILE}
-        if ! node /app/autotranslate.js -i ${INPUTTRANSLATIONFILE} -s ${AZURETRANLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -o ${OUTPUTTRANSLATIONFILE} -p "${REPORTLINEPREFIX}" &>>${REPORTFILE}; then
+        if ! node /app/autotranslate.js -i ${INPUTTRANSLATIONFILE} -s ${AZURETRANSLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -o ${OUTPUTTRANSLATIONFILE} -p "${REPORTLINEPREFIX}" &>>${REPORTFILE}; then
             echo "RENDER-DETAILS: failed"
             execution_strickness
         else
@@ -485,7 +485,7 @@ autotranslatefiles() {
                     cp ${MEMORYLINE}/${J2FILE} ${TLINE}/autotranslation/${J2FILE}
                 else
                     md5sum ${transi}.j2 >${TLINE}/autotranslation/${MD5SUMFILE}
-                    if ! node /app/autotranslateJ2.js -i ${transi}.j2 -o ${TLINE}/autotranslation/${J2FILE} -s ${AZURETRANLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -p "${REPORTLINEPREFIX}" &>>${REPORTFILE}; then
+                    if ! node /app/autotranslateJ2.js -i ${transi}.j2 -o ${TLINE}/autotranslation/${J2FILE} -s ${AZURETRANSLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -p "${REPORTLINEPREFIX}" &>>${REPORTFILE}; then
                         echo "RENDER-DETAILS: failed"
                         execution_strickness
                     else
@@ -494,7 +494,7 @@ autotranslatefiles() {
                 fi
             else
                 md5sum ${transi}.j2 >${TLINE}/autotranslation/${MD5SUMFILE}
-                if ! node /app/autotranslateJ2.js -i ${transi}.j2 -o ${TLINE}/autotranslation/${J2FILE} -s ${AZURETRANLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -p "${REPORTLINEPREFIX}" &>>${REPORTFILE}; then
+                if ! node /app/autotranslateJ2.js -i ${transi}.j2 -o ${TLINE}/autotranslation/${J2FILE} -s ${AZURETRANSLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -p "${REPORTLINEPREFIX}" &>>${REPORTFILE}; then
                     echo "RENDER-DETAILS: failed"
                     execution_strickness
                 else
@@ -503,7 +503,7 @@ autotranslatefiles() {
             fi
         else
             md5sum ${transi}.j2 >${TLINE}/autotranslation/${MD5SUMFILE}
-            if ! node /app/autotranslateJ2.js -i ${transi}.j2 -o ${TLINE}/autotranslation/${J2FILE} -s ${AZURETRANLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -p "${REPORTLINEPREFIX}" &>>${REPORTFILE}; then
+            if ! node /app/autotranslateJ2.js -i ${transi}.j2 -o ${TLINE}/autotranslation/${J2FILE} -s ${AZURETRANSLATIONKEY} -m ${PRIMELANGUAGE} -g ${GOALLANGUAGE} -p "${REPORTLINEPREFIX}" &>>${REPORTFILE}; then
                 echo "RENDER-DETAILS: failed"
                 execution_strickness
             else

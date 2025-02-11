@@ -88,4 +88,6 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 - adding statistics + configuration instructions 
 - add supporting tools
 - replace the specific configuration values in the CI/CD with generic templates
+- Make the statistics csv processing more robust
+- include the latest templates 
 
