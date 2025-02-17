@@ -93,4 +93,4 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 
 # version 4.0.2
 - circleci statitistics improvement
-
+- Update templates to latest version
