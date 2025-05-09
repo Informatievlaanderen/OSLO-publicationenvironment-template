@@ -59,6 +59,12 @@
    - config.json defaults are overwritten by publication point config
 - add freeze and unfreeze supporting scripts
 
+# version 3.1.3
+- in CircleCI config:
+    - bump node image version 
+    - correct parameter name 
+    - correct workdir to working_directory 
+- fix incorrect hardcoded hostname 
 
 # version 4.0.0
 - Move away from the Java based OSLO toolchain to the Typescript based OSLO toolchain.
@@ -95,3 +101,7 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 - circleci statitistics improvement
 - Update templates to latest version
 - fix expand-links script bug: values with spaces caused copying problems
+- update publication report
+   - add support for reporting github thema repository issues
+   - replace link the report to the published specification
+     The link to the reporting directory is maintained in a icon encoded form.
