@@ -120,4 +120,5 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
   - replace link the report to the published specification
   - The link to the reporting directory is maintained in a icon encoded form.
   - use # as last character for the shacl-generator instead of /
+  - Replace cloudfront CDN links to ui.vlaanderen.be
   
