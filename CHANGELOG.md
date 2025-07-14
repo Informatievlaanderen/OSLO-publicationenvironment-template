@@ -121,4 +121,9 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
   - The link to the reporting directory is maintained in a icon encoded form.
   - use # as last character for the shacl-generator instead of /
   - Replace cloudfront CDN links to ui.vlaanderen.be
+
+# version 4.1.0
+- Strict validation of the publication points
+- Migration from webuniversum 2 to webuniversum 3
+- Added migration script for webuniversum 2 to webuniversum 3
   

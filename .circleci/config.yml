@@ -20,9 +20,9 @@ jobs:
           command: $PWD/scripts/findPublicationsToUpdate.sh /tmp/workspace $PWD/config/publication.json $PWD/
       - run:
           command: $PWD/scripts/checkoutRepositories.sh /tmp/workspace $PWD/config/publication.json $PWD/config
-#      - run:
-#          command: $PWD/scripts/upgrade_config-4.sh /tmp/workspace $PWD/config 
-#          This is executed in next step
+      #      - run:
+      #          command: $PWD/scripts/upgrade_config-4.sh /tmp/workspace $PWD/config
+      #          This is executed in next step
       - run: if [ -e /tmp/workspace/checkouts.txt ] ; then cat /tmp/workspace/checkouts.txt ; fi
       - run: if [ -e /tmp/workspace/rawcheckouts.txt ] ; then cat /tmp/workspace/rawcheckouts.txt ; fi
       - run: if [ -e /home/circleci/project/changes.txt ] ; then cat /home/circleci/project/changes.txt ; fi
@@ -78,12 +78,24 @@ jobs:
       - run:
           name: Show the errors found (for debugging purposes)
           command: |
-            egrep " ERROR " /tmp/workspace/report4/*.report || true
-            egrep " Error " /tmp/workspace/report4/*.report || true
+            TEMP_ERROR_FILE="/tmp/error_output.txt"
+            egrep " ERROR " /tmp/workspace/report4/*.report 2>/dev/null >> "$TEMP_ERROR_FILE" || true
+            egrep " Error " /tmp/workspace/report4/*.report 2>/dev/null >> "$TEMP_ERROR_FILE" || true
+            egrep " error:" /tmp/workspace/report4/*.report 2>/dev/null >> "$TEMP_ERROR_FILE" || true
+
+            # Check if temp file has content
+            if [ -s "$TEMP_ERROR_FILE" ]; then
+              cat "$TEMP_ERROR_FILE"
+              echo "❌ Errors found in report files - failing step"
+              exit 1
+            else
+              echo "✅ No errors found in report files. Check for warnings in the weather forecast"
+            fi
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
           paths:
-            - report4/
+            - report4
   render-translation-4:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
@@ -133,9 +145,10 @@ jobs:
             ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace merge ${CIRCLEWKD}/config
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
           paths:
-            - report4/
             - autotranslation
+            - report4
   render-html-details-4:
     docker:
       - image: cimg/node:20.15.0
@@ -167,10 +180,48 @@ jobs:
           command: |
             if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
       - persist_to_workspace:
+          when: always
           root: /tmp/workspace
           paths:
-            - target/
             - report4/html
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - target
+  validate-jsonld-4:
+    docker:
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: touch a file
+          command: |
+            mkdir -p /tmp/workspace/report4/jsonld-validation
+            touch /tmp/workspace/report4/jsonld-validation/.ignore
+      - run:
+          name: install software
+          command: |
+            sudo npm install --global @oslo-flanders/jsonld-validator
+      - run:
+          name: Validate OSLO jsonld
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace validation ${CIRCLEWKD}/config
+      - run:
+          name: List the files which have been created
+          command: |
+            if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
+      - persist_to_workspace:
+          when: always
+          root: /tmp/workspace
+          paths:
+            - report4/jsonld-validation
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - target
   render-respec-html-details-4:
     docker:
       - image: cimg/node:20.15.0
@@ -192,18 +243,22 @@ jobs:
             mkdir -p /tmp/workspace/target /tmp/workspace/reporthtml
             export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
             ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace respec ${CIRCLEWKD}/config
-#      - run:
-#          name: copy the site-skeleton for the html -- XXX to be activated when only using this as hmtl renderer / or updated with a target to disambiguate 
-#          command: $PWD/scripts/copy_skeleton.sh
+      #      - run:
+      #          name: copy the site-skeleton for the html -- XXX to be activated when only using this as hmtl renderer / or updated with a target to disambiguate
+      #          command: $PWD/scripts/copy_skeleton.sh
       - run:
           name: List the files which have been created
           command: |
             if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
           paths:
-            - report4/respec/
-            - target/
+            - report4/respec
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - target
   render-rdf-details-4:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
@@ -230,9 +285,13 @@ jobs:
             if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
+          paths:
+            - report4/rdf
+      - persist_to_workspace:
+          root: /tmp/workspace
           paths:
             - target
-            - report4/rdf
   render-shacl-details-4:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
@@ -260,8 +319,12 @@ jobs:
             if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
           paths:
             - report4/shacl
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
             - target
   render-context-details-4:
     docker:
@@ -289,9 +352,13 @@ jobs:
             if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
+          paths:
+            - report4/context
+      - persist_to_workspace:
+          root: /tmp/workspace
           paths:
             - target
-            - report4/context
   render-example-templates:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
@@ -311,9 +378,13 @@ jobs:
             $PWD/scripts/render-details.sh /tmp/workspace example $PWD/config
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
+          paths:
+            - report4/examples
+      - persist_to_workspace:
+          root: /tmp/workspace
           paths:
             - target
-            - report4/examples
   render-xsd-details:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
@@ -424,6 +495,12 @@ jobs:
             else
               echo "No shacl directory found"
             fi
+            if [ -d "${RLINE}/jsonld-validation" ]; then
+              cp -r ${RLINE}/jsonld-validation/* ${RLINE} || true
+              rm -rf ${RLINE}/jsonld-validation
+            else
+              echo "No jsonld-validation directory found"
+            fi
       - run:
           name: download global overview memory
           working_directory: /tmp/workspace
@@ -439,9 +516,13 @@ jobs:
             ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace report ${CIRCLEWKD}/config
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
           paths:
-            - target/
-            - report4/
+            - report4
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - target
   copy-raw:
     docker:
       - image: cimg/node:20.15.0
@@ -463,7 +544,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - raw/
+            - raw
   create-artifact:
     parameters:
       generatedRepoFingerprint:
@@ -516,6 +597,7 @@ jobs:
             rm -rf rdf
             rm -rf respec
             rm -rf shacl
+            rm -rf jsonld-validation
       - run:
           name: Copy generated assets
           working_directory: /tmp/workspace
@@ -534,13 +616,13 @@ jobs:
           command: |
             ls -1
             if [ -d autotranslation ] ; then tar -zcf autotranslation.tgz autotranslation ; cp autotranslation.tgz /tmp/generated/autotranslation.tgz ; fi
-#      - run:
-#          name: check if all publication points are generated
-#          working_directory: /tmp/generated
-#          command: |
-#            ls -al *
-#            if [ -d report ] ; then ls -al report/* || ls -al report ; fi
-#            find report
+      #      - run:
+      #          name: check if all publication points are generated
+      #          working_directory: /tmp/generated
+      #          command: |
+      #            ls -al *
+      #            if [ -d report ] ; then ls -al report/* || ls -al report ; fi
+      #            find report
       - run:
           name: check the existence of all publication points
           command: |
@@ -565,6 +647,7 @@ jobs:
           command: |
             export TAG=`echo "${CIRCLE_SHA1}" | cut -c1-15`
             echo "{\"commit\" : \"$TAG\"}" > report4/commit.json
+            echo "{\"commit\" : \"$TAG\"}" > report/commit.json
       - run:
           name: Push results to github
           working_directory: /tmp/generated
@@ -593,6 +676,16 @@ workflows:
       - render-translation-4:
           generatedRepoFingerprint: "$$SSHKEYFINGERPRINT"
           requires:
+            - extract-jsonld-details-4:
+                - failed
+                - success
+                - canceled
+      - validate-jsonld-4:
+          requires:
+            - render-translation-4:
+                - failed
+                - success
+                - canceled
             - extract-jsonld-details-4
       - render-rdf-details-4:
           requires:
@@ -612,25 +705,38 @@ workflows:
       - convert-json-to-ttl:
           requires:
             - render-shacl-details-4
-      # - render-example-templates:
-      #     requires:
-      #       - render-merged-jsonld
-      # - render-xsd-details:
-      #          requires:
-      #            - render-merged-jsonld
       - copy-raw:
           requires:
             - checkout
+      # Make expand-links depend on ALL the jobs that produce data
       - expand-links:
           requires:
-            - render-context-details-4
-            - convert-json-to-ttl
-            - render-rdf-details-4
-            - render-html-details-4
-            - render-respec-html-details-4
-            # - render-example-templates
-            - copy-raw
+            - render-context-details-4:
+                - failed
+                - success
+                - canceled
+            - render-rdf-details-4:
+                - failed
+                - success
+                - canceled
+            - render-html-details-4:
+                - failed
+                - success
+                - canceled
+            - render-respec-html-details-4:
+                - failed
+                - success
+                - canceled
+            - validate-jsonld-4:
+                - failed
+                - success
+                - canceled
+            - render-shacl-details-4:
+                - failed
+                - success
+                - canceled
+      # Make create-artifact depend only on expand-links (the final consolidation step)
       - create-artifact:
-          generatedRepoFingerprint: "$$SSHKEYFINGERPRINT"
+          generatedRepoFingerprint: "SHA256:Sed50e4hsYwBwrvfMKXOJqXi/APsOoci2fOf3S8LTNI"
           requires:
             - expand-links
