@@ -132,3 +132,4 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 - report for completeness check of the generated repository aligned with issue detection rules  
 - enable parameter settings for ea-convertor
 - re-establish a .circleci template version instead of a concrete instance of data.vlaanderen.be
+- add " to allow spaces in diagram names

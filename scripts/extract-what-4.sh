@@ -119,7 +119,7 @@ extract_json() {
     echo "${REPORTLINEPREFIX}oslo-converter-ea for diagram ${DIAGRAM}" &>>${REPORTFILE}
     echo "${REPORTLINEPREFIX}-------------------------------------" &>>${REPORTFILE}
     oslo-converter-ea ${PARAMETERS} \
-                 --umlFile ${UMLFILE} --diagramName ${DIAGRAM} --outputFile ${OUTPUTFILE} \
+                 --umlFile ${UMLFILE} --diagramName "${DIAGRAM}" --outputFile ${OUTPUTFILE} \
                  --specificationType ${SPECTYPE} --versionId ${URLREF2} --baseUri https://${DOMAIN} \
 		 --debug true \
                  --publicationEnvironment ${HOSTNAME2}/ \
