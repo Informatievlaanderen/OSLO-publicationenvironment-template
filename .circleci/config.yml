@@ -20,9 +20,9 @@ jobs:
           command: $PWD/scripts/findPublicationsToUpdate.sh /tmp/workspace $PWD/config/publication.json $PWD/
       - run:
           command: $PWD/scripts/checkoutRepositories.sh /tmp/workspace $PWD/config/publication.json $PWD/config
-      #      - run:
-      #          command: $PWD/scripts/upgrade_config-4.sh /tmp/workspace $PWD/config
-      #          This is executed in next step
+#      - run:
+#          command: $PWD/scripts/upgrade_config-4.sh /tmp/workspace $PWD/config 
+#          This is executed in next step
       - run: if [ -e /tmp/workspace/checkouts.txt ] ; then cat /tmp/workspace/checkouts.txt ; fi
       - run: if [ -e /tmp/workspace/rawcheckouts.txt ] ; then cat /tmp/workspace/rawcheckouts.txt ; fi
       - run: if [ -e /home/circleci/project/changes.txt ] ; then cat /home/circleci/project/changes.txt ; fi
@@ -237,16 +237,15 @@ jobs:
             mkdir -p /tmp/workspace/target /tmp/workspace/reporthtml
             export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
             ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace respec ${CIRCLEWKD}/config
-      #      - run:
-      #          name: copy the site-skeleton for the html -- XXX to be activated when only using this as hmtl renderer / or updated with a target to disambiguate
-      #          command: $PWD/scripts/copy_skeleton.sh
+#      - run:
+#          name: copy the site-skeleton for the html -- XXX to be activated when only using this as hmtl renderer / or updated with a target to disambiguate 
+#          command: $PWD/scripts/copy_skeleton.sh
       - run:
           name: List the files which have been created
           command: |
             if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
       - persist_to_workspace:
           root: /tmp/workspace
-          when: always
           paths:
             - report4/respec
             - target
@@ -278,8 +277,8 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - report4/rdf
             - target
+            - report4/rdf
   render-shacl-details-4:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0
@@ -309,8 +308,8 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - target
             - report4/shacl
+            - target
   render-context-details-4:
     docker:
       - image: cimg/node:20.15.0
@@ -339,8 +338,8 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - report4/context
             - target
+            - report4/context
   render-example-templates:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
@@ -362,8 +361,8 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - report4/examples
             - target
+            - report4/examples
   render-xsd-details:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
@@ -497,8 +496,8 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - report4
-            - target
+            - target/
+            - report4/
   copy-raw:
     docker:
       - image: cimg/node:20.15.0
@@ -520,7 +519,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - raw
+            - raw/
   create-artifact:
     parameters:
       generatedRepoFingerprint:
@@ -592,13 +591,13 @@ jobs:
           command: |
             ls -1
             if [ -d autotranslation ] ; then tar -zcf autotranslation.tgz autotranslation ; cp autotranslation.tgz /tmp/generated/autotranslation.tgz ; fi
-      #      - run:
-      #          name: check if all publication points are generated
-      #          working_directory: /tmp/generated
-      #          command: |
-      #            ls -al *
-      #            if [ -d report ] ; then ls -al report/* || ls -al report ; fi
-      #            find report
+#      - run:
+#          name: check if all publication points are generated
+#          working_directory: /tmp/generated
+#          command: |
+#            ls -al *
+#            if [ -d report ] ; then ls -al report/* || ls -al report ; fi
+#            find report
       - run:
           name: check the existence of all publication points
           command: |
@@ -623,7 +622,6 @@ jobs:
           command: |
             export TAG=`echo "${CIRCLE_SHA1}" | cut -c1-15`
             echo "{\"commit\" : \"$TAG\"}" > report4/commit.json
-            echo "{\"commit\" : \"$TAG\"}" > report/commit.json
       - run:
           name: Push results to github
           working_directory: /tmp/generated
@@ -687,6 +685,12 @@ workflows:
                 - failed
                 - success
                 - canceled
+      # - render-example-templates:
+      #     requires:
+      #       - render-merged-jsonld
+      # - render-xsd-details:
+      #          requires:
+      #            - render-merged-jsonld
       - copy-raw:
           requires:
             - checkout
@@ -727,6 +731,6 @@ workflows:
                 - canceled
       # Make create-artifact depend only on expand-links (the final consolidation step)
       - create-artifact:
-          generatedRepoFingerprint: "SHA256:Sed50e4hsYwBwrvfMKXOJqXi/APsOoci2fOf3S8LTNI"
+          generatedRepoFingerprint: "$$SSHKEYFINGERPRINT"
           requires:
             - expand-links
