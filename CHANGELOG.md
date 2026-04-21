@@ -134,3 +134,6 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 - re-establish a .circleci template version instead of a concrete instance of data.vlaanderen.be
 - add " to allow spaces in diagram names
 - Look for case-insensitive "error" instead of "rror" in the logs
+
+# version 4.2.1 
+- Fix for cloud/sun behaviour in the publication report: the cloud/sun icons are now correctly displayed based on WARN or ERROR in the logs
