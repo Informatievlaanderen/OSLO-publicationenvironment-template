@@ -137,3 +137,6 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 
 # version 4.2.1 
 - Fix for cloud/sun behaviour in the publication report: the cloud/sun icons are now correctly displayed based on WARN or ERROR in the logs
+
+# version 4.2.1 
+- Fix license URL to be https://data.vlaanderen.be/id/licentie/modellicentie-gratis-hergebruik/v1.0
