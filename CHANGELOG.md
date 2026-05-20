@@ -143,3 +143,4 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 
 # version 4.2.3
 - Add bundling to the publication point configuration to allow for bundling of publications. This will fetch all potential assets like codelists, external ontologies, etc.
+- improvements on bundling process
