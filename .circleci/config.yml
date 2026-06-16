@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   checkout:
     docker:
-      - image: cimg/node:20.15.0
+      - image: cimg/node:24.11.0
     steps:
       - checkout
       #      - add_ssh_keys:
@@ -20,9 +20,9 @@ jobs:
           command: $PWD/scripts/findPublicationsToUpdate.sh /tmp/workspace $PWD/config/publication.json $PWD/
       - run:
           command: $PWD/scripts/checkoutRepositories.sh /tmp/workspace $PWD/config/publication.json $PWD/config
-#      - run:
-#          command: $PWD/scripts/upgrade_config-4.sh /tmp/workspace $PWD/config 
-#          This is executed in next step
+      #      - run:
+      #          command: $PWD/scripts/upgrade_config-4.sh /tmp/workspace $PWD/config
+      #          This is executed in next step
       - run: if [ -e /tmp/workspace/checkouts.txt ] ; then cat /tmp/workspace/checkouts.txt ; fi
       - run: if [ -e /tmp/workspace/rawcheckouts.txt ] ; then cat /tmp/workspace/rawcheckouts.txt ; fi
       - run: if [ -e /home/circleci/project/changes.txt ] ; then cat /home/circleci/project/changes.txt ; fi
@@ -151,7 +151,7 @@ jobs:
             - autotranslation
   render-html-details-4:
     docker:
-      - image: cimg/node:20.15.0
+      - image: cimg/node:24.11.0
     steps:
       - checkout
       - attach_workspace:
@@ -218,7 +218,7 @@ jobs:
             - target
   render-respec-html-details-4:
     docker:
-      - image: cimg/node:20.15.0
+      - image: cimg/node:24.11.0
     steps:
       - checkout
       - attach_workspace:
@@ -237,15 +237,16 @@ jobs:
             mkdir -p /tmp/workspace/target /tmp/workspace/reporthtml
             export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
             ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace respec ${CIRCLEWKD}/config
-#      - run:
-#          name: copy the site-skeleton for the html -- XXX to be activated when only using this as hmtl renderer / or updated with a target to disambiguate 
-#          command: $PWD/scripts/copy_skeleton.sh
+      #      - run:
+      #          name: copy the site-skeleton for the html -- XXX to be activated when only using this as hmtl renderer / or updated with a target to disambiguate
+      #          command: $PWD/scripts/copy_skeleton.sh
       - run:
           name: List the files which have been created
           command: |
             if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
       - persist_to_workspace:
           root: /tmp/workspace
+          when: always
           paths:
             - report4/respec
             - target
@@ -277,8 +278,8 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - target
             - report4/rdf
+            - target
   render-shacl-details-4:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
@@ -308,11 +309,11 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - report4/shacl
             - target
+            - report4/shacl
   render-context-details-4:
     docker:
-      - image: cimg/node:20.15.0
+      - image: cimg/node:24.11.0
     steps:
       - checkout
       - attach_workspace:
@@ -338,8 +339,38 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - target
             - report4/context
+            - target
+  render-swagger-4:
+    docker:
+      - image: cimg/node:24.11.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: touch a file
+          command: |
+            mkdir -p /tmp/workspace/report4/swagger
+            touch /tmp/workspace/report4/swagger/.ignore
+      - run:
+          name: install software
+          command: sudo npm install -g @oslo-flanders/swagger-generator
+      - run:
+          name: Render swagger file of  merged json file (a)
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace swagger ${CIRCLEWKD}/config
+      - run:
+          name: List the files which have been created
+          command: |
+            if [ -d /tmp/workspace/report4 ] ; then ls -al /tmp/workspace/report4/* ; fi || true
+      - persist_to_workspace:
+          root: /tmp/workspace
+          when: always
+          paths:
+            - report4/swagger
+            - target
   render-example-templates:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
@@ -361,8 +392,8 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - target
             - report4/examples
+            - target
   render-xsd-details:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev-0.9
@@ -414,6 +445,24 @@ jobs:
           root: /tmp/workspace
           paths:
             - target/
+  bundle-release:
+    docker:
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Bundle ontologies and artefacts
+          command: |
+            export CIRCLEWKD=$( eval echo "${CIRCLE_WORKING_DIRECTORY}" )
+            ${CIRCLEWKD}/scripts/render-details4.sh /tmp/workspace bundle ${CIRCLEWKD}/config
+      - persist_to_workspace:
+          root: /tmp/workspace
+          when: always
+          paths:
+            - target
+            - report4
   expand-links:
     docker:
       - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
@@ -473,6 +522,12 @@ jobs:
             else
               echo "No shacl directory found"
             fi
+            if [ -d "${RLINE}/swagger" ]; then
+              cp -r ${RLINE}/swagger/* ${RLINE} || true
+              rm -rf ${RLINE}/swagger
+            else
+              echo "No swagger directory found"
+            fi
             if [ -d "${RLINE}/jsonld-validation" ]; then
               cp -r ${RLINE}/jsonld-validation/* ${RLINE} || true
               rm -rf ${RLINE}/jsonld-validation
@@ -496,11 +551,11 @@ jobs:
           root: /tmp/workspace
           when: always
           paths:
-            - target/
-            - report4/
+            - report4
+            - target
   copy-raw:
     docker:
-      - image: cimg/node:20.15.0
+      - image: cimg/node:24.11.0
     steps:
       - checkout
       - attach_workspace:
@@ -519,13 +574,13 @@ jobs:
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - raw/
+            - raw
   create-artifact:
     parameters:
       generatedRepoFingerprint:
         type: string
     docker:
-      - image: cimg/node:20.15.0
+      - image: cimg/node:24.11.0
     steps:
       - checkout
       - attach_workspace:
@@ -572,6 +627,7 @@ jobs:
             rm -rf rdf
             rm -rf respec
             rm -rf shacl
+            rm -rf swagger
             rm -rf jsonld-validation
       - run:
           name: Copy generated assets
@@ -591,13 +647,13 @@ jobs:
           command: |
             ls -1
             if [ -d autotranslation ] ; then tar -zcf autotranslation.tgz autotranslation ; cp autotranslation.tgz /tmp/generated/autotranslation.tgz ; fi
-#      - run:
-#          name: check if all publication points are generated
-#          working_directory: /tmp/generated
-#          command: |
-#            ls -al *
-#            if [ -d report ] ; then ls -al report/* || ls -al report ; fi
-#            find report
+      #      - run:
+      #          name: check if all publication points are generated
+      #          working_directory: /tmp/generated
+      #          command: |
+      #            ls -al *
+      #            if [ -d report ] ; then ls -al report/* || ls -al report ; fi
+      #            find report
       - run:
           name: check the existence of all publication points
           command: |
@@ -622,6 +678,7 @@ jobs:
           command: |
             export TAG=`echo "${CIRCLE_SHA1}" | cut -c1-15`
             echo "{\"commit\" : \"$TAG\"}" > report4/commit.json
+            echo "{\"commit\" : \"$TAG\"}" > report/commit.json
       - run:
           name: Push results to github
           working_directory: /tmp/generated
@@ -639,9 +696,36 @@ jobs:
             git tag "${TAG}"
             git push --force origin "${CIRCLE_BRANCH}"
             git push --tags
+  weekly-trigger-all:
+    parameters:
+      repoFingerprint:
+        type: string
+    docker:
+      - image: cimg/node:24.11.0
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - << parameters.repoFingerprint >>
+      - run:
+          name: Trigger rebuild of all publication points
+          command: |
+            # Run the triggerall.test.sh script from the scripts directory
+            ./scripts/triggerall.test.sh
+      - run:
+          name: Commit and trigger main workflow
+          command: |
+            git config user.email "$(jq -r .generatedrepository.gitEmail config/config.json)"
+            git config user.name "$(jq -r .generatedrepository.gitUser config/config.json)"
+            git add .
+            git commit -m "Weekly maintenance: trigger all publication points - $(date)"
+            git push origin ${CIRCLE_BRANCH}
 workflows:
   version: 2
-  generate_documentation:
+  generate_documentation_non_prod:
+    when:
+      not:
+        equal: [ production, << pipeline.git.branch >> ]
     jobs:
       - checkout
       - extract-jsonld-details-4:
@@ -679,23 +763,19 @@ workflows:
       - render-shacl-details-4:
           requires:
             - render-translation-4
+      - render-swagger-4:
+          requires:
+            - render-translation-4
       - convert-json-to-ttl:
           requires:
             - render-shacl-details-4:
                 - failed
                 - success
                 - canceled
-      # - render-example-templates:
-      #     requires:
-      #       - render-merged-jsonld
-      # - render-xsd-details:
-      #          requires:
-      #            - render-merged-jsonld
       - copy-raw:
           requires:
             - checkout
-      # Make expand-links depend on ALL the jobs that produce data
-      - expand-links:
+      - bundle-release:
           requires:
             - render-context-details-4:
                 - failed
@@ -721,6 +801,10 @@ workflows:
                 - failed
                 - success
                 - canceled
+            - render-swagger-4:
+                - failed
+                - success
+                - canceled
             - convert-json-to-ttl:
                 - failed
                 - success
@@ -729,8 +813,87 @@ workflows:
                 - failed
                 - success
                 - canceled
+      - expand-links:
+          requires:
+            - bundle-release
       # Make create-artifact depend only on expand-links (the final consolidation step)
       - create-artifact:
-          generatedRepoFingerprint: "$$SSHKEYFINGERPRINT"
+          generatedRepoFingerprint: "SHA256:4z5hJXh2r+2cQVWc13onR3y+Z35PMBHKwJ52yRd/8JA"
           requires:
             - expand-links
+  generate_documentation_prod:
+    when:
+      equal: [ production, << pipeline.git.branch >> ]
+    jobs:
+      - checkout
+      - extract-jsonld-details-4:
+          requires:
+            - checkout
+      - render-translation-4:
+          generatedRepoFingerprint: "$$SSHKEYFINGERPRINT"
+          requires:
+            - extract-jsonld-details-4
+      - validate-jsonld-4:
+          requires:
+            - render-translation-4
+            - extract-jsonld-details-4
+      - render-rdf-details-4:
+          requires:
+            - render-translation-4
+      - render-respec-html-details-4:
+          requires:
+            - render-translation-4
+      - render-html-details-4:
+          requires:
+            - render-translation-4
+      - render-context-details-4:
+          requires:
+            - render-translation-4
+      - render-shacl-details-4:
+          requires:
+            - render-translation-4
+      - render-swagger-4:
+          requires:
+            - render-translation-4
+      - convert-json-to-ttl:
+          requires:
+            - render-shacl-details-4
+      - copy-raw:
+          requires:
+            - checkout
+      - bundle-release:
+          requires:
+            - render-context-details-4
+            - render-rdf-details-4
+            - render-html-details-4
+            - render-respec-html-details-4
+            - validate-jsonld-4
+            - render-shacl-details-4
+            - render-swagger-4
+            - convert-json-to-ttl
+            - copy-raw
+      - expand-links:
+          requires:
+            - bundle-release
+      # Make create-artifact depend only on expand-links (the final consolidation step)
+      - hold-for-prod:
+          type: approval
+          requires:
+            - expand-links
+      - create-artifact:
+          generatedRepoFingerprint: "SHA256:4z5hJXh2r+2cQVWc13onR3y+Z35PMBHKwJ52yRd/8JA"
+          requires:
+            - hold-for-prod
+            - expand-links
+  # New weekly scheduled workflow
+  weekly_maintenance:
+    triggers:
+      - schedule:
+          cron: "0 12 * * 4" # Run at 12 PM (12:00) every Thursday
+          filters:
+            branches:
+              only:
+                - dev
+    jobs:
+      - weekly-trigger-all:
+          repoFingerprint: "SHA256:pOYapwEA5OgOMrEPxcwOxnIMQjserWnAmJGaYIYXOEw"
