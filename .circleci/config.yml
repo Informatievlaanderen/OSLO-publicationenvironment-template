@@ -794,7 +794,7 @@ workflows:
             - bundle-release
       # Make create-artifact depend only on expand-links (the final consolidation step)
       - create-artifact:
-          generatedRepoFingerprint: "SHA256:4z5hJXh2r+2cQVWc13onR3y+Z35PMBHKwJ52yRd/8JA"
+          generatedRepoFingerprint: "SHA256:fmR6NGcDhfDHFggXNHb182Dglr1FEUwL3OpzM7zVl9Q"
           requires:
             - expand-links
   generate_documentation_prod:
