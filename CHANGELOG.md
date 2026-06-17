@@ -146,3 +146,4 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 - improvements on bundling process
 - Bumped informatievlaanderen/oslo-specification-generator:multilingual-dev4.0 to informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
 - Improved templates
+- Added logic for implementatiemodels to expand-links for shorthand /shacl and /context paths
