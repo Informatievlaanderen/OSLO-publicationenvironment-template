@@ -391,11 +391,12 @@ render_metadata() {
 }
 
 validate_jsonld() {
-    echo "validate jsonld: $1 $2 $3 $4"
+    echo "validate jsonld: $1 $2 $3 $4 $5"
     local SLINE=$1
     local TLINE=$2
     local JSONI=$3
     local RLINE=$4
+    local LANGUAGE=$5
     
     MERGEDFILE=${JSONI}
     COMMAND=$(echo '.type')
@@ -416,6 +417,8 @@ validate_jsonld() {
             SPECTYPE="ApplicationProfile"
         ;;
     esac
+
+    generator_parameters jsonldvalidation ${JSONI}
     
     
     mkdir -p ${RLINE}
@@ -423,12 +426,13 @@ validate_jsonld() {
     REPORTFILE=${RLINE}/jsonld-validation.report.md
     echo "${REPORTLINEPREFIX}oslo-jsonld-validator ${REPORTLINENEWLINE}" &>>${REPORTFILE}
     echo "${REPORTLINEPREFIX}-------------------------------------${REPORTLINENEWLINE}" &>>${REPORTFILE}
-    echo "$URIDOMAIN"
     
     oslo-jsonld-validator --input ${MERGEDFILE} \
     --whitelist https://raw.githubusercontent.com/Informatievlaanderen/OSLO-UML-Transformer/refs/heads/configuration/whitelist.json \
     --specificationType ${SPECTYPE} \
     --publicationEnvironment $URIDOMAIN \
+    --language ${LANGUAGE} \
+    ${PARAMETERS} \
     2>&1 | tee -a ${REPORTFILE}
     
     echo ${REPORTFILE}

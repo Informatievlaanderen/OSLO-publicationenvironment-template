@@ -148,3 +148,7 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 - Improved templates
 - Added logic for implementatiemodels to expand-links for shorthand /shacl and /context paths
 - added `publicationEnvironment` to jsonld validator
+
+version 4.2.4
+- added option for `--language` to jsonld-validator to allow for validation of a specific language context
+- allow overruling of parameters for the jsonld-validator in the publication point configuration using `jsonldvalidation`

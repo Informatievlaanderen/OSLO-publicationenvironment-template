@@ -17,7 +17,7 @@
     "gitEmail": "toolchain@dev.specs.org",
     "gitUser": "toolchain"
   },
-  "toolchainversion": "4.1.1",
+  "toolchainversion": "4.2.4",
   "toolchain": {
     "strickness": "lazy",
     "version": 4,
