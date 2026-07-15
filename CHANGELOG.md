@@ -152,3 +152,4 @@ Upgrading from version 3.x.y to 4.x.y is thus a non-trivial task.
 version 4.2.4
 - added option for `--language` to jsonld-validator to allow for validation of a specific language context
 - allow overruling of parameters for the jsonld-validator in the publication point configuration using `jsonldvalidation`
+- Updated multilangual templates for ap
