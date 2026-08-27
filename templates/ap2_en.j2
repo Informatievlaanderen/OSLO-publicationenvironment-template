@@ -37,10 +37,12 @@
          <!-- end global header-->
       </div>
       <!-- Start page content -->
+      {% set langSwitcherLabel = "Language switcher" %}
+      {% include "_language-switcher.j2" %}
       <div class="vl-page">
          <div class="vl-layout">
             <div class="vl-skiplink">
-               <a rel="nofollow noreferrer" href="#main">Skip this section and go to general content</a>
+               <a rel="nofollow noreferrer" href="#main">Skip and go to main content</a>
             </div>
          </div>
          <div class="vl-page">
@@ -49,8 +51,12 @@
                   <div class="vl-grid u-hr">
                      <div class="vl-col--9-12 vl-col--1-1--s">
                         {% if data.metadata.autotranslate %}
-                           <div class="disclaimer">
-                              <p>This document is a translation from {{ data.metadata.primaryLanguage }} to English.</p>
+                           <div class="vl-alert vl-alert--warning" role="alert">
+                              <p>
+                                 <strong>Unofficial automatic translation.</strong>
+                                 This document has been automatically translated from {{ data.metadata.primaryLanguage }} to English.
+                                 The official version is available in {{ data.metadata.primaryLanguage }}.
+                              </p>
                            </div>
                         {% endif %}
                         <div class="head" role="contentinfo" id="respecHeader">
@@ -67,6 +73,10 @@
                                  <dd>
                                     <a href="{{ data.metadata.navigation.self }}">{{ data.metadata.navigation.self }}</a>
                                  </dd>
+                                 {% if data.metadata.recognizedLanguages %}
+                                    <dt>Recognized in language</dt>
+                                    <dd>{{ data.metadata.recognizedLanguages | join(', ') | upper }}</dd>
+                                 {% endif %}
                                  {% if data.metadata.navigation.next %}
                                     <dt>Next version</dt>
                                     <dd>
@@ -261,10 +271,14 @@
                      <div class="vl-region vl-region.vl-region--no-space-top" id="overview">
                         <h2 class="vl-title--h2">Overview</h2>
                         {% if data.metadata.autotranslate %}
-                           <div class="disclaimer">
-                              <p>This document is a translation from {{ data.metadata.primaryLanguage }} to English.</p>
-                              <br></div>
-                           {% endif %}
+                           <div class="vl-alert vl-alert--warning" role="alert">
+                              <p>
+                                 <strong>Unofficial automatic translation.</strong>
+                                 This document has been automatically translated from {{ data.metadata.primaryLanguage }} to English.
+                                 The official version is available in {{ data.metadata.primaryLanguage }}.
+                              </p>
+                           </div>
+                        {% endif %}
                            <div class="vl-grid">
                               <div class="vl-col--9-12 vl-col--1-1--s vl-typography">
                                  {% if ( ( data.classes | length > 0)   ) %}
@@ -727,38 +741,44 @@
                      a[href]:hover {
                         background: #ffa
                      }
-                  }
-                  p {
-                     text-align: justify;
-                  }
-                  tr:nth-child(even) td {
-                     background-color: #eee;
-                  }
-                  dt,
-                  dd {
-                     margin-top: 0;
-                     margin-bottom: 0
-                  } /* opera 3.50 */
-                  dt {
-                     font-weight: bold
-                  }
-                  pre,
-                  code {
-                     font-family: monospace
-                  } /* navigator 4 requires this */
-                  em {
-                     font-style: italic;
-                  }
-                  img {
-                     width: 100%;
-                  }
-                  .vl-tooltip {
-                     max-width: 128rem;
-                  }
-               </style>
-               <script src="https://data.vlaanderen.be/assets/dist/core.js"></script>
-               <script src="https://data.vlaanderen.be/assets/dist/tooltip.js"></script>
-            </body>
+                     @media screen {
+                        /* hide from IE3 */
+                        a[href]:hover {
+                           background: #ffa
+                        }
+                     }
+                     p {
+                        text-align: justify;
+                     }
+                     tr:nth-child(even) td {
+                        background-color: #eee;
+                     }
+                     dt,
+                     dd {
+                        margin-top: 0;
+                        margin-bottom: 0
+                     } /* opera 3.50 */
+                     dt {
+                        font-weight: bold
+                     }
+                     pre,
+                     code {
+                        font-family: monospace
+                     } /* navigator 4 requires this */
+                     em {
+                        font-style: italic;
+                     }
+                     img {
+                        width: 100%;
+                     }
+                     .vl-tooltip {
+                        max-width: 128rem;
+                     }
+                  </style>
+                  <script src="https://data.vlaanderen.be/assets/dist/core.js"></script>
+                  <script src="https://data.vlaanderen.be/assets/dist/tooltip.js"></script>
+               </body>
+            </html>
          </html>
       </html>
    </body>

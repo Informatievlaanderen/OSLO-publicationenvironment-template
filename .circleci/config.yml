@@ -41,7 +41,7 @@ jobs:
             - raw-input/
   extract-jsonld-details-4:
     docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.1.0
     steps:
       - checkout
       - attach_workspace:
@@ -98,7 +98,7 @@ jobs:
             - report4
   render-translation-4:
     docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.1.0
     parameters:
       generatedRepoFingerprint:
         type: string
@@ -187,7 +187,7 @@ jobs:
             - target
   validate-jsonld-4:
     docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.1.0
     steps:
       - checkout
       - attach_workspace:
@@ -252,7 +252,7 @@ jobs:
             - target
   render-rdf-details-4:
     docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.1.0
     steps:
       - checkout
       - attach_workspace:
@@ -282,7 +282,7 @@ jobs:
             - target
   render-shacl-details-4:
     docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.1.0
     steps:
       - checkout
       - attach_workspace:
@@ -435,19 +435,19 @@ jobs:
       - run:
           name: Convert -SHACL.jsonld file to -SHACL.ttl files
           command: |
-            find /tmp/workspace/target -name \*-SHACL.jsonld -type f | $PWD/scripts/convert_to_any.sh turtle
+            find /tmp/workspace/target -name '*-SHACL*.jsonld' -type f | $PWD/scripts/convert_to_any.sh turtle
       - run:
           name: List the -SHACL.ttl and context files found
           command: |
-            if [ -d /tmp/workspace/target ] ; then find /tmp/workspace/target -name \*-SHACL.ttl -type f ; fi
-            if [ -d /tmp/workspace/target ] ; then find /tmp/workspace/target -name \*.ttl -type f ; fi
+            if [ -d /tmp/workspace/target ] ; then find /tmp/workspace/target -name '*-SHACL*.ttl' -type f ; fi
+            if [ -d /tmp/workspace/target ] ; then find /tmp/workspace/target -name '*.ttl' -type f ; fi
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - target/
   bundle-release:
     docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.1.0
     steps:
       - checkout
       - attach_workspace:
@@ -465,7 +465,7 @@ jobs:
             - report4
   expand-links:
     docker:
-      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.0.3
+      - image: informatievlaanderen/oslo-specification-generator:multilingual-dev4.1.0
     steps:
       - checkout
       - attach_workspace:
@@ -696,6 +696,30 @@ jobs:
             git tag "${TAG}"
             git push --force origin "${CIRCLE_BRANCH}"
             git push --tags
+  weekly-trigger-all:
+    parameters:
+      repoFingerprint:
+        type: string
+    docker:
+      - image: cimg/node:24.11.0
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - << parameters.repoFingerprint >>
+      - run:
+          name: Trigger rebuild of all publication points
+          command: |
+            # Run the triggerall.test.sh script from the scripts directory
+            ./scripts/triggerall.test.sh
+      - run:
+          name: Commit and trigger main workflow
+          command: |
+            git config user.email "$(jq -r .generatedrepository.gitEmail config/config.json)"
+            git config user.name "$(jq -r .generatedrepository.gitUser config/config.json)"
+            git add .
+            git commit -m "Weekly maintenance: trigger all publication points - $(date)"
+            git push origin ${CIRCLE_BRANCH}
 workflows:
   version: 2
   generate_documentation_non_prod:
@@ -794,7 +818,7 @@ workflows:
             - bundle-release
       # Make create-artifact depend only on expand-links (the final consolidation step)
       - create-artifact:
-          generatedRepoFingerprint: "SHA256:fmR6NGcDhfDHFggXNHb182Dglr1FEUwL3OpzM7zVl9Q"
+          generatedRepoFingerprint: "SHA256:4z5hJXh2r+2cQVWc13onR3y+Z35PMBHKwJ52yRd/8JA"
           requires:
             - expand-links
   generate_documentation_prod:
@@ -857,7 +881,19 @@ workflows:
           requires:
             - expand-links
       - create-artifact:
-          generatedRepoFingerprint: "SHA256:fmR6NGcDhfDHFggXNHb182Dglr1FEUwL3OpzM7zVl9Q"
+          generatedRepoFingerprint: "SHA256:4z5hJXh2r+2cQVWc13onR3y+Z35PMBHKwJ52yRd/8JA"
           requires:
             - hold-for-prod
             - expand-links
+  # New weekly scheduled workflow
+  weekly_maintenance:
+    triggers:
+      - schedule:
+          cron: "0 12 * * 4" # Run at 12 PM (12:00) every Thursday
+          filters:
+            branches:
+              only:
+                - dev
+    jobs:
+      - weekly-trigger-all:
+          repoFingerprint: "SHA256:pOYapwEA5OgOMrEPxcwOxnIMQjserWnAmJGaYIYXOEw"
